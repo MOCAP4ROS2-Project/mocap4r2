@@ -1,5 +1,5 @@
 repositories:
-  cascade_lifecycle:
+  mocap_msgs:
     type: git
     url: https://github.com/MOCAP4ROS2-Project/mocap_msgs
-    version: main
+    version: master
