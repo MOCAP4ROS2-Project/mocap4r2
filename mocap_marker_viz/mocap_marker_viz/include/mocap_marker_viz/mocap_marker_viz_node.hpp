@@ -14,8 +14,8 @@
 //
 // Author: David Vargas Frutos <david.vargas@urjc.es>
 
-#ifndef MARKER_VIZ__MARKER_VIZ_NODE_HPP_
-#define MARKER_VIZ__MARKER_VIZ_NODE_HPP_
+#ifndef MOCAP_MARKER_VIZ__MOCAP_MARKER_VIZ_NODE_HPP_
+#define MOCAP_MARKER_VIZ__MOCAP_MARKER_VIZ_NODE_HPP_
 
 #include <chrono>
 #include <memory>
@@ -60,4 +60,4 @@ private:
   std::map<int, std_msgs::msg::ColorRGBA> marker_color_;
 };
 
-#endif  // MARKER_VIZ__MARKER_VIZ_NODE_HPP_
+#endif  // MOCAP_MARKER_VIZ__MOCAP_MARKER_VIZ_NODE_HPP_
