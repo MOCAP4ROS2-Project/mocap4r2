@@ -29,8 +29,9 @@ namespace mocap_control
 class ControlledLifecycleNode : public rclcpp_lifecycle::LifecycleNode
 {
 public:
-  explicit ControlledLifecycleNode(const std::string & system_id, 
-              const rclcpp::NodeOptions & node_options = rclcpp::NodeOptions());
+  explicit ControlledLifecycleNode(
+    const std::string & system_id,
+    const rclcpp::NodeOptions & node_options = rclcpp::NodeOptions());
 
 protected:
   template<typename MessageT, typename AllocatorT = std::allocator<void>>
