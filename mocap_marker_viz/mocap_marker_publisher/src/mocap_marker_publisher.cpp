@@ -39,7 +39,8 @@ public:
     mocap_msgs::msg::Markers markers;
     for (int i = 0; i < 10; i++) {
       mocap_msgs::msg::Marker marker;
-      marker.index = i;
+      marker.id_type = mocap_msgs::msg::Marker::USE_INDEX;
+      marker.marker_index = i;
       marker.translation.x = 0;
       marker.translation.y = 0;
       marker.translation.z = 0.1 * i;
