@@ -29,8 +29,10 @@ namespace mocap_control
 
 using std::placeholders::_1;
 
-ControlledLifecycleNode::ControlledLifecycleNode(const std::string & system_id)
-: LifecycleNode(system_id)
+ControlledLifecycleNode::ControlledLifecycleNode(
+  const std::string & system_id,
+  const rclcpp::NodeOptions & node_options)
+: LifecycleNode(system_id, node_options)
 {
   mocap_control_sub_ = create_subscription<mocap_control_msgs::msg::Control>(
     "mocap_control", rclcpp::QoS(100).reliable(),
