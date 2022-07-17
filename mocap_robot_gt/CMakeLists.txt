@@ -35,9 +35,19 @@ add_executable(gt_program src/gt_program.cpp)
 ament_target_dependencies(gt_component ${dependencies})
 target_link_libraries(gt_program gt_component)
 
+add_library(set_gt_component SHARED src/mocap_robot_gt/set_gt_component.cpp)
+ament_target_dependencies(set_gt_component ${dependencies})
+rclcpp_components_register_nodes(set_gt_component "mocap_robot_gt::SetGTNode")
+
+add_executable(set_gt_cli src/set_gt_cli.cpp)
+ament_target_dependencies(set_gt_cli ${dependencies})
+target_link_libraries(set_gt_cli set_gt_component)
+
 install(TARGETS
   gt_component
   gt_program
+  set_gt_component
+  set_gt_cli
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME})

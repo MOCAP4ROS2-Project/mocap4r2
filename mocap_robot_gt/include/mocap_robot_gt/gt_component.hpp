@@ -18,12 +18,12 @@
 
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
-#include <tf2_ros/static_transform_broadcaster.h>
 #include <tf2_ros/transform_broadcaster.h>
 
 #include <vector>
 
 #include "mocap_msgs/msg/rigid_body.hpp"
+#include "mocap_msgs/srv/set_gt_origin.hpp"
 
 #include "rclcpp/rclcpp.hpp"
 
@@ -37,19 +37,25 @@ public:
 
 protected:
   void rigid_body_callback(const mocap_msgs::msg::RigidBody::SharedPtr msg);
-  tf2::Transform get_tf_from_vector(const std::vector<double> & init_pos);
+  void set_gt_origin_callback(const std::shared_ptr<mocap_msgs::srv::SetGTOrigin::Request> req,
+    std::shared_ptr<mocap_msgs::srv::SetGTOrigin::Response> resp);
+
+  geometry_msgs::msg::Pose get_pose_from_vector(const std::vector<double> & init_pos);
 
   tf2::BufferCore tf_buffer_;
   tf2_ros::TransformListener tf_listener_;
-  std::shared_ptr<tf2_ros::StaticTransformBroadcaster> static_tf_broadcaster_;
   std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
 
   rclcpp::Subscription<mocap_msgs::msg::RigidBody>::SharedPtr rigid_body_sub_;
+  rclcpp::Service<mocap_msgs::srv::SetGTOrigin>::SharedPtr set_gt_origin_srv_; 
 
   std::string root_frame_;
   std::string robot_frame_;
-  tf2::Transform mocap2root_;
+
+  tf2::Transform offset_;
   tf2::Transform gtbody2robot_;
+  tf2::Transform mocap2gtbody_;
+
   bool valid_gtbody2robot_{false};
 
 };
