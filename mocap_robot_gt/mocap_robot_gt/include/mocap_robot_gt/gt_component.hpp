@@ -23,7 +23,7 @@
 #include <vector>
 
 #include "mocap_msgs/msg/rigid_body.hpp"
-#include "mocap_msgs/srv/set_gt_origin.hpp"
+#include "mocap_robot_gt_msgs/srv/set_gt_origin.hpp"
 
 #include "rclcpp/rclcpp.hpp"
 
@@ -37,8 +37,8 @@ public:
 
 protected:
   void rigid_body_callback(const mocap_msgs::msg::RigidBody::SharedPtr msg);
-  void set_gt_origin_callback(const std::shared_ptr<mocap_msgs::srv::SetGTOrigin::Request> req,
-    std::shared_ptr<mocap_msgs::srv::SetGTOrigin::Response> resp);
+  void set_gt_origin_callback(const std::shared_ptr<mocap_robot_gt_msgs::srv::SetGTOrigin::Request> req,
+    std::shared_ptr<mocap_robot_gt_msgs::srv::SetGTOrigin::Response> resp);
 
   geometry_msgs::msg::Pose get_pose_from_vector(const std::vector<double> & init_pos);
 
@@ -47,7 +47,7 @@ protected:
   std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
 
   rclcpp::Subscription<mocap_msgs::msg::RigidBody>::SharedPtr rigid_body_sub_;
-  rclcpp::Service<mocap_msgs::srv::SetGTOrigin>::SharedPtr set_gt_origin_srv_; 
+  rclcpp::Service<mocap_robot_gt_msgs::srv::SetGTOrigin>::SharedPtr set_gt_origin_srv_; 
 
   std::string root_frame_;
   std::string robot_frame_;

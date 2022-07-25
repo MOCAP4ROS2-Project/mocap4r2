@@ -15,7 +15,7 @@
 #include <vector>
 
 #include "mocap_robot_gt/set_gt_component.hpp"
-#include "mocap_msgs/srv/set_gt_origin.hpp"
+#include "mocap_robot_gt_msgs/srv/set_gt_origin.hpp"
 
 #include "rclcpp/rclcpp.hpp"
 
@@ -28,13 +28,13 @@ SetGTNode::SetGTNode(const rclcpp::NodeOptions & options)
 : Node("set_gt", options)
 {
   
-  set_gt_origin_cli_ = create_client<mocap_msgs::srv::SetGTOrigin>("/mocap_gt/set_get_origin");
+  set_gt_origin_cli_ = create_client<mocap_robot_gt_msgs::srv::SetGTOrigin>("/mocap_gt/set_get_origin");
 }
 
 void
 SetGTNode::set_gt(std::vector<double> init_pose)
 {
-  auto request = std::make_shared<mocap_msgs::srv::SetGTOrigin::Request>();
+  auto request = std::make_shared<mocap_robot_gt_msgs::srv::SetGTOrigin::Request>();
   
   if (init_pose.empty()) {
     request->current_is_origin = true;

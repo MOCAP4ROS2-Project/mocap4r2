@@ -24,7 +24,7 @@
 #include <vector>
 
 #include "mocap_msgs/msg/rigid_body.hpp"
-#include "mocap_msgs/srv/set_gt_origin.hpp"
+#include "mocap_robot_gt_msgs/srv/set_gt_origin.hpp"
 
 #include "rclcpp/rclcpp.hpp"
 
@@ -39,7 +39,7 @@ public:
   void set_gt(std::vector<double> init_pose);
 
 protected:
-  rclcpp::Client<mocap_msgs::srv::SetGTOrigin>::SharedPtr set_gt_origin_cli_; 
+  rclcpp::Client<mocap_robot_gt_msgs::srv::SetGTOrigin>::SharedPtr set_gt_origin_cli_; 
 };
 
 }  // namespace mocap_robot_gt

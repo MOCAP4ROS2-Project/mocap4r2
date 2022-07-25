@@ -3,14 +3,15 @@
 <package format="3">
   <name>mocap_robot_gt</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <description>Package that provides Ground Truth tools for robots</description>
   <maintainer email="fmrico@gmail.com">fmrico</maintainer>
-  <license>TODO: License declaration</license>
+  <license>Apache License, Version 2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>rclcpp</depend>
   <depend>rclcpp_components</depend>
+  <depend>mocap_robot_gt_msgs</depend>
   <depend>mocap_msgs</depend>
   <depend>tf2_ros</depend>
   <depend>geometry_msgs</depend>

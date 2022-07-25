@@ -39,7 +39,7 @@ GTNode::GTNode(const rclcpp::NodeOptions & options)
 
   rigid_body_sub_ = create_subscription<mocap_msgs::msg::RigidBody>(
     "rigid_bodies", rclcpp::SensorDataQoS(), std::bind(&GTNode::rigid_body_callback, this, _1));
-  set_gt_origin_srv_ = create_service<mocap_msgs::srv::SetGTOrigin>(
+  set_gt_origin_srv_ = create_service<mocap_robot_gt_msgs::srv::SetGTOrigin>(
     "~/set_get_origin", std::bind(&GTNode::set_gt_origin_callback, this, _1, _2));
 
   declare_parameter<std::string>("root_frame", "odom");
@@ -96,8 +96,9 @@ GTNode::rigid_body_callback(const mocap_msgs::msg::RigidBody::SharedPtr msg)
 }
 
 void
-GTNode::set_gt_origin_callback(const std::shared_ptr<mocap_msgs::srv::SetGTOrigin::Request> req,
-  std::shared_ptr<mocap_msgs::srv::SetGTOrigin::Response> resp)
+GTNode::set_gt_origin_callback(
+  const std::shared_ptr<mocap_robot_gt_msgs::srv::SetGTOrigin::Request> req,
+  std::shared_ptr<mocap_robot_gt_msgs::srv::SetGTOrigin::Response> resp)
 {
   if (!valid_gtbody2robot_) {
     resp->success = false;
