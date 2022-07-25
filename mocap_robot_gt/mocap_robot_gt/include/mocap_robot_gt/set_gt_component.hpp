@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MOCAP_ROBOT_GT__GTNODE_HPP_
-#define MOCAP_ROBOT_GT__GTNODE_HPP_
+#ifndef MOCAP_ROBOT_GT__SETGTNODE_HPP_
+#define MOCAP_ROBOT_GT__SETGTNODE_HPP_
 
 
 #include <tf2_ros/buffer.h>
@@ -24,36 +24,24 @@
 #include <vector>
 
 #include "mocap_msgs/msg/rigid_body.hpp"
+#include "mocap_robot_gt_msgs/srv/set_gt_origin.hpp"
 
 #include "rclcpp/rclcpp.hpp"
 
 
 namespace mocap_robot_gt
 {
-class GTNode : public rclcpp::Node
+class SetGTNode : public rclcpp::Node
 {
 public:
-  explicit GTNode(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
+  explicit SetGTNode(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
+
+  void set_gt(std::vector<double> init_pose);
 
 protected:
-  void rigid_body_callback(const mocap_msgs::msg::RigidBody::SharedPtr msg);
-  tf2::Transform get_tf_from_vector(const std::vector<double> & init_pos);
-
-  tf2::BufferCore tf_buffer_;
-  tf2_ros::TransformListener tf_listener_;
-  std::shared_ptr<tf2_ros::StaticTransformBroadcaster> static_tf_broadcaster_;
-  std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
-
-  rclcpp::Subscription<mocap_msgs::msg::RigidBody>::SharedPtr rigid_body_sub_;
-
-  std::string root_frame_;
-  std::string robot_frame_;
-  tf2::Transform mocap2root_;
-  tf2::Transform gtbody2robot_;
-  bool valid_gtbody2robot_{false};
-
+  rclcpp::Client<mocap_robot_gt_msgs::srv::SetGTOrigin>::SharedPtr set_gt_origin_cli_; 
 };
 
 }  // namespace mocap_robot_gt
 
-#endif  // MOCAP_ROBOT_GT__GTNODE_HPP_
+#endif  // MOCAP_ROBOT_GT__SETGTNODE_HPP_

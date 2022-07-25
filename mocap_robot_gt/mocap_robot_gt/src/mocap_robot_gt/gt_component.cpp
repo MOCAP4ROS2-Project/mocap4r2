@@ -28,16 +28,19 @@ namespace mocap_robot_gt
 {
 
 using std::placeholders::_1;
+using std::placeholders::_2;
 
 GTNode::GTNode(const rclcpp::NodeOptions & options)
 : Node("mocap_gt", options),
   tf_buffer_(),
   tf_listener_(tf_buffer_)
 {
-  static_tf_broadcaster_ = std::make_shared<tf2_ros::StaticTransformBroadcaster>(*this);
   tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(*this);
+
   rigid_body_sub_ = create_subscription<mocap_msgs::msg::RigidBody>(
     "rigid_bodies", rclcpp::SensorDataQoS(), std::bind(&GTNode::rigid_body_callback, this, _1));
+  set_gt_origin_srv_ = create_service<mocap_robot_gt_msgs::srv::SetGTOrigin>(
+    "~/set_get_origin", std::bind(&GTNode::set_gt_origin_callback, this, _1, _2));
 
   declare_parameter<std::string>("root_frame", "odom");
   declare_parameter<std::string>("robot_frame", "base_footprint");
@@ -50,17 +53,10 @@ GTNode::GTNode(const rclcpp::NodeOptions & options)
   get_parameter("init_mocap_xyzrpy", init_mocap_coordinates);
 
   if (init_mocap_coordinates.size() == 6u) {
-    mocap2root_ = get_tf_from_vector(init_mocap_coordinates);
+    tf2::fromMsg(get_pose_from_vector(init_mocap_coordinates), offset_);
   } else {
     RCLCPP_ERROR(get_logger(), "Error in init_mocap_xyzrpy coordinates - setting all values to 0");
-    mocap2root_ = get_tf_from_vector({0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
-
-    geometry_msgs::msg::TransformStamped mocap2root_msg;
-    mocap2root_msg.header.frame_id = "mocap";
-    mocap2root_msg.header.stamp = now();
-    mocap2root_msg.transform = tf2::toMsg(mocap2root_);
-
-    static_tf_broadcaster_->sendTransform(mocap2root_msg);
+    tf2::fromMsg(get_pose_from_vector({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}), offset_);
   }
 }
 
@@ -78,17 +74,16 @@ GTNode::rigid_body_callback(const mocap_msgs::msg::RigidBody::SharedPtr msg)
         get_logger(), "Transform base_mocap->%s exception: [%s]", robot_frame_.c_str(), e.what());
     }
   } else {
-    tf2::Transform mocap2gtbody;
-    mocap2gtbody.setOrigin(
+    mocap2gtbody_.setOrigin(
       tf2::Vector3(
         msg->pose.position.x, msg->pose.position.y, msg->pose.position.z));
-    mocap2gtbody.setRotation(
+    mocap2gtbody_.setRotation(
       tf2::Quaternion(
         msg->pose.orientation.x, msg->pose.orientation.y, msg->pose.orientation.z,
         msg->pose.orientation.w));
 
     tf2::Transform root2robotgt;
-    root2robotgt = mocap2root_.inverse() * mocap2gtbody * gtbody2robot_;
+    root2robotgt = offset_ * mocap2gtbody_ * gtbody2robot_;
 
     geometry_msgs::msg::TransformStamped root2robotgt_msg;
     root2robotgt_msg.header.frame_id = root_frame_;
@@ -100,17 +95,63 @@ GTNode::rigid_body_callback(const mocap_msgs::msg::RigidBody::SharedPtr msg)
   }
 }
 
-tf2::Transform
-GTNode::get_tf_from_vector(const std::vector<double> & init_pos)
+void
+GTNode::set_gt_origin_callback(
+  const std::shared_ptr<mocap_robot_gt_msgs::srv::SetGTOrigin::Request> req,
+  std::shared_ptr<mocap_robot_gt_msgs::srv::SetGTOrigin::Response> resp)
 {
-  tf2::Transform ret;
-  ret.setOrigin(tf2::Vector3(init_pos[0], init_pos[1], init_pos[2]));
+  if (!valid_gtbody2robot_) {
+    resp->success = false;
+    resp->error_msg = "Pose still not valid setting origin";
+    RCLCPP_ERROR(get_logger(), "%s", resp->error_msg.c_str());
+    return;
+  }
 
-  tf2::Quaternion q;
-  q.setEuler(init_pos[3], init_pos[4], init_pos[5]);
-  ret.setRotation(q);
+  tf2::Transform wish_gt;
+  if (req->current_is_origin) {
+     wish_gt.setOrigin({0.0, 0.0, 0.0});
+     wish_gt.setRotation({0.0, 0.0, 0.0, 1.0});
+  } else {
+    wish_gt.setOrigin(
+      tf2::Vector3(
+        req->origin_pose.position.x, req->origin_pose.position.y, req->origin_pose.position.z));
+    wish_gt.setRotation(
+      tf2::Quaternion(
+        req->origin_pose.orientation.x, req->origin_pose.orientation.y, req->origin_pose.orientation.z,
+        req->origin_pose.orientation.w));
+  }
 
-  return ret;
+  tf2::Transform root2robotgt;
+  root2robotgt = mocap2gtbody_ * gtbody2robot_;
+
+  offset_ = root2robotgt.inverse() * wish_gt;
+
+  resp->success = true;
+}
+
+
+geometry_msgs::msg::Pose
+GTNode::get_pose_from_vector(const std::vector<double> & init_pos)
+{
+  geometry_msgs::msg::Pose ret;
+
+  if (init_pos.size() == 6u) {
+    tf2::Quaternion q;
+    q.setEuler(init_pos[3], init_pos[4], init_pos[5]);
+
+    ret.position.x = init_pos[0];
+    ret.position.y = init_pos[1];
+    ret.position.z = init_pos[2];
+    ret.orientation.x = q.x();
+    ret.orientation.y = q.y();
+    ret.orientation.z = q.z();
+    ret.orientation.w = q.w();
+
+    return ret;
+  } else {
+    RCLCPP_WARN(get_logger(), "Trying to get Pose for a wrong vector");
+    return ret;
+  }
 }
 
 }  // namespace mocap_robot_gt
