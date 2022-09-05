@@ -52,6 +52,13 @@ MarkerVisualizer::MarkerVisualizer()
 
   markers_subscription_ = this->create_subscription<mocap_msgs::msg::Markers>(
     "markers", 1000, std::bind(&MarkerVisualizer::marker_callback, this, _1));
+
+  // Rigid bodies
+  markers_subscription_rb_ = this->create_subscription<mocap_msgs::msg::RigidBody>(
+    "rigid_bodies", 1000, std::bind(&MarkerVisualizer::rb_callback, this, _1));
+
+  publisher_rb_ = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>(
+    "visualization_marker_rb", 1000);
 }
 
 
@@ -91,4 +98,24 @@ MarkerVisualizer::marker2visual(int index, const geometry_msgs::msg::Point & tra
   viz_marker.scale = marker_scale_;
   viz_marker.lifetime = rclcpp::Duration(1s);
   return viz_marker;
+}
+
+
+void
+MarkerVisualizer::rb_callback(const mocap_msgs::msg::RigidBody::SharedPtr msg) const
+{
+  if (publisher_rb_->get_subscription_count() == 0) {
+    return;
+  }
+
+  geometry_msgs::msg::PoseWithCovarianceStamped visual_rb;
+  visual_rb.header = msg->header;
+  visual_rb.header.frame_id = marker_frame_;
+  visual_rb.pose.pose = msg->pose;
+  for (int i = 0; i < 6; i++) {
+    for (int j = 0; j < 6; j++) {
+      visual_rb.pose.covariance[i * 6 + j] = 0.0;
+    }
+  }
+  publisher_rb_->publish(visual_rb);
 }
