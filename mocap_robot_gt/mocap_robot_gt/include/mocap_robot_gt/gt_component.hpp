@@ -51,6 +51,7 @@ protected:
 
   std::string root_frame_;
   std::string robot_frame_;
+  std::string mocap_frame_;
 
   tf2::Transform offset_;
   tf2::Transform gtbody2robot_;

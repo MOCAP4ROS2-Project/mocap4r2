@@ -44,10 +44,12 @@ GTNode::GTNode(const rclcpp::NodeOptions & options)
 
   declare_parameter<std::string>("root_frame", "odom");
   declare_parameter<std::string>("robot_frame", "base_footprint");
+  declare_parameter<std::string>("mocap_frame", "base_mocap");
   declare_parameter<std::vector<double>>("init_mocap_xyzrpy", {0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
 
   get_parameter("root_frame", root_frame_);
   get_parameter("robot_frame", robot_frame_);
+  get_parameter("mocap_frame", mocap_frame_);
 
   std::vector<double> init_mocap_coordinates;
   get_parameter("init_mocap_xyzrpy", init_mocap_coordinates);
@@ -66,12 +68,13 @@ GTNode::rigid_body_callback(const mocap_msgs::msg::RigidBody::SharedPtr msg)
   if (!valid_gtbody2robot_) {
     try {
       auto gtbody2robot_msg = tf_buffer_.lookupTransform(
-        "base_mocap", robot_frame_, tf2::TimePointZero);
+        mocap_frame_, robot_frame_, tf2::TimePointZero);
       tf2::fromMsg(gtbody2robot_msg.transform, gtbody2robot_);
       valid_gtbody2robot_ = true;
     } catch (const tf2::TransformException & e) {
       RCLCPP_WARN(
-        get_logger(), "Transform base_mocap->%s exception: [%s]", robot_frame_.c_str(), e.what());
+        get_logger(), "Transform %s->%s exception: [%s]",
+          mocap_frame_.c_str(), robot_frame_.c_str(), e.what());
     }
   } else {
     mocap2gtbody_.setOrigin(
