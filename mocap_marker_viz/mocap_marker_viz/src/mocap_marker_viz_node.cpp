@@ -35,7 +35,7 @@ MarkerVisualizer::MarkerVisualizer()
   declare_parameter<double>("marker_scale_y", 0.014f);
   declare_parameter<double>("marker_scale_z", 0.014f);
   declare_parameter<float>("marker_lifetime", 0.01f);
-  declare_parameter<std::string>("marker_frame", "mocap");
+  declare_parameter<std::string>("marker_frame", "map");
   declare_parameter<std::string>("namespace", "mocap_markers");
 
   get_parameter<float>("default_marker_color_r", default_marker_color_.r);
@@ -52,6 +52,13 @@ MarkerVisualizer::MarkerVisualizer()
 
   markers_subscription_ = this->create_subscription<mocap_msgs::msg::Markers>(
     "markers", 1000, std::bind(&MarkerVisualizer::marker_callback, this, _1));
+
+  // Rigid bodies
+  markers_subscription_rb_ = this->create_subscription<mocap_msgs::msg::RigidBody>(
+    "rigid_bodies", 1000, std::bind(&MarkerVisualizer::rb_callback, this, _1));
+
+  publisher_rb_ = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>(
+    "visualization_marker_rb", 1000);
 }
 
 
@@ -81,8 +88,9 @@ MarkerVisualizer::marker2visual(int index, const geometry_msgs::msg::Point & tra
   viz_marker.id = index;
   viz_marker.type = visualization_msgs::msg::Marker::SPHERE;
   viz_marker.action = visualization_msgs::msg::Marker::ADD;
-  viz_marker.pose.position.x = translation.x;
-  viz_marker.pose.position.y = translation.y;
+  // This axis modify the original pose from optitrack driver to set rviz axis
+  viz_marker.pose.position.x = -translation.y;
+  viz_marker.pose.position.y = translation.x;
   viz_marker.pose.position.z = translation.z;
   viz_marker.pose.orientation.x = 0.0f;
   viz_marker.pose.orientation.y = 0.0f;
@@ -91,4 +99,31 @@ MarkerVisualizer::marker2visual(int index, const geometry_msgs::msg::Point & tra
   viz_marker.scale = marker_scale_;
   viz_marker.lifetime = rclcpp::Duration(1s);
   return viz_marker;
+}
+
+
+void
+MarkerVisualizer::rb_callback(const mocap_msgs::msg::RigidBody::SharedPtr msg) const
+{
+  if (publisher_rb_->get_subscription_count() == 0) {
+    return;
+  }
+
+  geometry_msgs::msg::PoseWithCovarianceStamped visual_rb;
+  visual_rb.header = msg->header;
+  visual_rb.header.frame_id = marker_frame_;
+  // This axis modify the original pose from optitrack driver to set rviz axis
+  visual_rb.pose.pose.position.x = -msg->pose.position.y;
+  visual_rb.pose.pose.position.y = msg->pose.position.x;
+  visual_rb.pose.pose.position.z = msg->pose.position.z;
+  visual_rb.pose.pose.orientation.x = msg->pose.orientation.x;
+  visual_rb.pose.pose.orientation.y = -msg->pose.orientation.y;
+  visual_rb.pose.pose.orientation.z = msg->pose.orientation.z;
+  
+  for (int i = 0; i < 6; i++) {
+    for (int j = 0; j < 6; j++) {
+      visual_rb.pose.covariance[i * 6 + j] = 0.0;
+    }
+  }
+  publisher_rb_->publish(visual_rb);
 }
