@@ -119,7 +119,7 @@ MarkerVisualizer::rb_callback(const mocap_msgs::msg::RigidBody::SharedPtr msg) c
   visual_rb.pose.pose.orientation.x = msg->pose.orientation.x;
   visual_rb.pose.pose.orientation.y = -msg->pose.orientation.y;
   visual_rb.pose.pose.orientation.z = msg->pose.orientation.z;
-  
+
   for (int i = 0; i < 6; i++) {
     for (int j = 0; j < 6; j++) {
       visual_rb.pose.covariance[i * 6 + j] = 0.0;
