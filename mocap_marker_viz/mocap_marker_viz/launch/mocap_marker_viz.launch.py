@@ -12,22 +12,71 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+
+from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
+from launch.conditions import UnlessCondition
 
 
 def generate_launch_description():
 
-    return LaunchDescription([
-        Node(
-            package='mocap_marker_viz',
-            executable='mocap_marker_viz',
-            output='both',
-            emulate_tty=True,
-            # Set to True to process just if there is a subscription,
-            # False to process always
-            parameters=[
-                {"mocap_system": "optitrack"},
-            ],
-        )
-    ])
+    mocap_marker_viz_dir = get_package_share_directory('mocap_marker_viz')
+    rviz_config_file = LaunchConfiguration('rviz_config_file')
+    use_namespace = LaunchConfiguration('use_namespace')
+    mocap_system = LaunchConfiguration('mocap_system')
+
+    declare_mocap_system = DeclareLaunchArgument(
+        'mocap_system',
+        default_value='optitrack',
+        description='')
+
+    declare_rviz_config_file_cmd = DeclareLaunchArgument(
+        'rviz_config_file',
+        default_value=os.path.join(
+            mocap_marker_viz_dir, 'rviz', 'config.rviz'),
+        description='Full path to the RVIZ config file to use')
+    
+    declare_use_namespace_cmd = DeclareLaunchArgument(
+        'use_namespace',
+        default_value='false',
+        description='Whether to apply a namespace to the navigation stack')
+
+    declare_use_rviz_cmd = DeclareLaunchArgument(
+        'use_rviz',
+        default_value='True',
+        description='Whether to start RVIZ')
+
+    start_rviz_cmd = Node(
+        condition=UnlessCondition(use_namespace),
+        package='rviz2',
+        executable='rviz2',
+        arguments=['-d', rviz_config_file],
+        output='screen')
+
+    start_mocap_marker_rviz = Node(
+        package='mocap_marker_viz',
+        executable='mocap_marker_viz',
+        output='both',
+        emulate_tty=True,
+        parameters=[{'mocap_system': mocap_system}],
+    )
+
+    # Create the launch description and populate
+    ld = LaunchDescription()
+
+    # Declare the launch options
+    ld.add_action(declare_rviz_config_file_cmd)
+
+    ld.add_action(declare_rviz_config_file_cmd)
+    ld.add_action(declare_use_namespace_cmd)
+    ld.add_action(declare_mocap_system)
+    ld.add_action(declare_use_rviz_cmd)
+
+    ld.add_action(start_rviz_cmd)
+    ld.add_action(start_mocap_marker_rviz)
+
+    return ld
