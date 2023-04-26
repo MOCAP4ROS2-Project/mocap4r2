@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 // Author: David Vargas Frutos <david.vargas@urjc.es>
+// Author: Jose Miguel Guerrero Hernandez <josemiguel.guerrero@urjc.es>
 
 #include <string>
 
@@ -37,6 +38,7 @@ MarkerVisualizer::MarkerVisualizer()
   declare_parameter<float>("marker_lifetime", 0.01f);
   declare_parameter<std::string>("marker_frame", "map");
   declare_parameter<std::string>("namespace", "mocap_markers");
+  declare_parameter<std::string>("mocap_system", "optitrack");
 
   get_parameter<float>("default_marker_color_r", default_marker_color_.r);
   get_parameter<float>("default_marker_color_g", default_marker_color_.g);
@@ -48,17 +50,43 @@ MarkerVisualizer::MarkerVisualizer()
   get_parameter<float>("marker_lifetime", marker_lifetime_);
   get_parameter<std::string>("marker_frame", marker_frame_);
   get_parameter<std::string>("namespace", namespace_);
-
+  get_parameter<std::string>("mocap_system", mocap_system_);
 
   markers_subscription_ = this->create_subscription<mocap_msgs::msg::Markers>(
     "markers", 1000, std::bind(&MarkerVisualizer::marker_callback, this, _1));
 
   // Rigid bodies
-  markers_subscription_rb_ = this->create_subscription<mocap_msgs::msg::RigidBody>(
+  markers_subscription_rb_ = this->create_subscription<mocap_msgs::msg::RigidBodies>(
     "rigid_bodies", 1000, std::bind(&MarkerVisualizer::rb_callback, this, _1));
 
-  publisher_rb_ = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>(
+  publisher_rb_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(
     "visualization_marker_rb", 1000);
+}
+
+
+// This function change mocap axis to match with rviz axis
+geometry_msgs::msg::Pose MarkerVisualizer::mocap2rviz(const geometry_msgs::msg::Pose mocap_pose)
+const
+{
+  geometry_msgs::msg::Pose rviz_pose;
+  if (mocap_system_ == "optitrack") {
+    rviz_pose.position.x = -mocap_pose.position.y;
+    rviz_pose.position.y = mocap_pose.position.x;
+    rviz_pose.position.z = mocap_pose.position.z;
+    rviz_pose.orientation.x = mocap_pose.orientation.x;
+    rviz_pose.orientation.y = -mocap_pose.orientation.y;
+    rviz_pose.orientation.z = mocap_pose.orientation.z;
+    rviz_pose.orientation.w = mocap_pose.orientation.w;
+  } else if (mocap_system_ == "vicon") {
+    // TO-DO:
+    rviz_pose = mocap_pose;
+  } else if (mocap_system_ == "qualisys") {
+    // TO-DO:
+    rviz_pose = mocap_pose;
+  } else {
+    rviz_pose = mocap_pose;
+  }
+  return rviz_pose;
 }
 
 
@@ -88,14 +116,14 @@ MarkerVisualizer::marker2visual(int index, const geometry_msgs::msg::Point & tra
   viz_marker.id = index;
   viz_marker.type = visualization_msgs::msg::Marker::SPHERE;
   viz_marker.action = visualization_msgs::msg::Marker::ADD;
-  // This axis modify the original pose from optitrack driver to set rviz axis
-  viz_marker.pose.position.x = -translation.y;
-  viz_marker.pose.position.y = translation.x;
-  viz_marker.pose.position.z = translation.z;
-  viz_marker.pose.orientation.x = 0.0f;
-  viz_marker.pose.orientation.y = 0.0f;
-  viz_marker.pose.orientation.z = 0.0f;
-  viz_marker.pose.orientation.w = 1.0f;
+  // Change mocap system axis to rviz axis
+  geometry_msgs::msg::Pose marker_pose;
+  marker_pose.position = translation;
+  marker_pose.orientation.x = 0.0f;
+  marker_pose.orientation.y = 0.0f;
+  marker_pose.orientation.z = 0.0f;
+  marker_pose.orientation.w = 1.0f;
+  viz_marker.pose = mocap2rviz(marker_pose);
   viz_marker.scale = marker_scale_;
   viz_marker.lifetime = rclcpp::Duration(1s);
   return viz_marker;
@@ -103,27 +131,48 @@ MarkerVisualizer::marker2visual(int index, const geometry_msgs::msg::Point & tra
 
 
 void
-MarkerVisualizer::rb_callback(const mocap_msgs::msg::RigidBody::SharedPtr msg) const
+MarkerVisualizer::rb_callback(const mocap_msgs::msg::RigidBodies::SharedPtr msg) const
 {
   if (publisher_rb_->get_subscription_count() == 0) {
     return;
   }
 
-  geometry_msgs::msg::PoseWithCovarianceStamped visual_rb;
-  visual_rb.header = msg->header;
-  visual_rb.header.frame_id = marker_frame_;
-  // This axis modify the original pose from optitrack driver to set rviz axis
-  visual_rb.pose.pose.position.x = -msg->pose.position.y;
-  visual_rb.pose.pose.position.y = msg->pose.position.x;
-  visual_rb.pose.pose.position.z = msg->pose.position.z;
-  visual_rb.pose.pose.orientation.x = msg->pose.orientation.x;
-  visual_rb.pose.pose.orientation.y = -msg->pose.orientation.y;
-  visual_rb.pose.pose.orientation.z = msg->pose.orientation.z;
+  static int counter_rb = 0;
+  static int counter_markers_rb = 0;
+  visualization_msgs::msg::MarkerArray visual_markers_rb;
 
-  for (int i = 0; i < 6; i++) {
-    for (int j = 0; j < 6; j++) {
-      visual_rb.pose.covariance[i * 6 + j] = 0.0;
+  for (const mocap_msgs::msg::RigidBody & rb : msg->rigidbodies) {
+    visual_markers_rb.markers.push_back(rb2visual(counter_rb++, rb.pose));
+
+    for (const mocap_msgs::msg::Marker & marker : rb.markers) {
+      visual_markers_rb.markers.push_back(marker2visual(counter_markers_rb++, marker.translation));
     }
   }
-  publisher_rb_->publish(visual_rb);
+
+  publisher_rb_->publish(visual_markers_rb);
+}
+
+
+visualization_msgs::msg::Marker
+MarkerVisualizer::rb2visual(int index, const geometry_msgs::msg::Pose & poserb) const
+{
+  visualization_msgs::msg::Marker viz_marker;
+  viz_marker.header.frame_id = marker_frame_;
+  viz_marker.header.stamp = rclcpp::Clock().now();
+  viz_marker.ns = namespace_;
+  viz_marker.color = default_marker_color_;
+  viz_marker.id = index;
+  viz_marker.type = visualization_msgs::msg::Marker::ARROW;
+  viz_marker.action = visualization_msgs::msg::Marker::ADD;
+
+  // Change mocap system axis to rviz axis
+  viz_marker.pose = mocap2rviz(poserb);
+
+  geometry_msgs::msg::Vector3 marker_scale_;
+  marker_scale_.x = 0.5f;
+  marker_scale_.y = 0.014f;
+  marker_scale_.z = 0.014f;
+  viz_marker.scale = marker_scale_;
+  viz_marker.lifetime = rclcpp::Duration(0.1s);
+  return viz_marker;
 }

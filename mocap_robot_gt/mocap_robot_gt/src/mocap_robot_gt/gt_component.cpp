@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Author: Jose Miguel Guerrero Hernandez <josemiguel.guerrero@urjc.es>
+
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
 #include <tf2_ros/static_transform_broadcaster.h>
@@ -37,8 +39,8 @@ GTNode::GTNode(const rclcpp::NodeOptions & options)
 {
   tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(*this);
 
-  rigid_body_sub_ = create_subscription<mocap_msgs::msg::RigidBody>(
-    "rigid_bodies", rclcpp::SensorDataQoS(), std::bind(&GTNode::rigid_body_callback, this, _1));
+  rigid_body_sub_ = create_subscription<mocap_msgs::msg::RigidBodies>(
+    "rigid_bodies", rclcpp::SensorDataQoS(), std::bind(&GTNode::rigid_bodies_callback, this, _1));
   set_gt_origin_srv_ = create_service<mocap_robot_gt_msgs::srv::SetGTOrigin>(
     "~/set_get_origin", std::bind(&GTNode::set_gt_origin_callback, this, _1, _2));
 
@@ -61,7 +63,7 @@ GTNode::GTNode(const rclcpp::NodeOptions & options)
 }
 
 void
-GTNode::rigid_body_callback(const mocap_msgs::msg::RigidBody::SharedPtr msg)
+GTNode::rigid_bodies_callback(const mocap_msgs::msg::RigidBodies::SharedPtr msg)
 {
   if (!valid_gtbody2robot_) {
     try {
@@ -76,11 +78,13 @@ GTNode::rigid_body_callback(const mocap_msgs::msg::RigidBody::SharedPtr msg)
   } else {
     mocap2gtbody_.setOrigin(
       tf2::Vector3(
-        msg->pose.position.x, msg->pose.position.y, msg->pose.position.z));
+        msg->rigidbodies[0].pose.position.x, msg->rigidbodies[0].pose.position.y,
+        msg->rigidbodies[0].pose.position.z));
     mocap2gtbody_.setRotation(
       tf2::Quaternion(
-        msg->pose.orientation.x, msg->pose.orientation.y, msg->pose.orientation.z,
-        msg->pose.orientation.w));
+        msg->rigidbodies[0].pose.orientation.x, msg->rigidbodies[0].pose.orientation.y,
+        msg->rigidbodies[0].pose.orientation.z,
+        msg->rigidbodies[0].pose.orientation.w));
 
     tf2::Transform root2robotgt;
     root2robotgt = offset_ * mocap2gtbody_ * gtbody2robot_;
@@ -109,15 +113,16 @@ GTNode::set_gt_origin_callback(
 
   tf2::Transform wish_gt;
   if (req->current_is_origin) {
-     wish_gt.setOrigin({0.0, 0.0, 0.0});
-     wish_gt.setRotation({0.0, 0.0, 0.0, 1.0});
+    wish_gt.setOrigin({0.0, 0.0, 0.0});
+    wish_gt.setRotation({0.0, 0.0, 0.0, 1.0});
   } else {
     wish_gt.setOrigin(
       tf2::Vector3(
         req->origin_pose.position.x, req->origin_pose.position.y, req->origin_pose.position.z));
     wish_gt.setRotation(
       tf2::Quaternion(
-        req->origin_pose.orientation.x, req->origin_pose.orientation.y, req->origin_pose.orientation.z,
+        req->origin_pose.orientation.x, req->origin_pose.orientation.y,
+        req->origin_pose.orientation.z,
         req->origin_pose.orientation.w));
   }
 
