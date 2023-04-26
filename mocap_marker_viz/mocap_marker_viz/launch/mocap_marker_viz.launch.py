@@ -39,7 +39,7 @@ def generate_launch_description():
         default_value=os.path.join(
             mocap_marker_viz_dir, 'rviz', 'config.rviz'),
         description='Full path to the RVIZ config file to use')
-    
+
     declare_use_namespace_cmd = DeclareLaunchArgument(
         'use_namespace',
         default_value='false',
