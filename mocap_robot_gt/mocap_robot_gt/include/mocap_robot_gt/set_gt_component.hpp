@@ -39,7 +39,7 @@ public:
   void set_gt(std::vector<double> init_pose);
 
 protected:
-  rclcpp::Client<mocap_robot_gt_msgs::srv::SetGTOrigin>::SharedPtr set_gt_origin_cli_; 
+  rclcpp::Client<mocap_robot_gt_msgs::srv::SetGTOrigin>::SharedPtr set_gt_origin_cli_;
 };
 
 }  // namespace mocap_robot_gt

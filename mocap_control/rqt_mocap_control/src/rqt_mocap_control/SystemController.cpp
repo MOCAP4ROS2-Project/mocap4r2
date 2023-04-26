@@ -32,7 +32,8 @@
 #include "rqt_mocap_control/SystemController.hpp"
 #include "rqt_mocap_control/utils.hpp"
 
-namespace rqt_mocap_control {
+namespace rqt_mocap_control
+{
 
 SystemController::SystemController(
   rclcpp::Node::SharedPtr node, const std::string & system_name)
@@ -64,14 +65,14 @@ SystemController::get_topics()
 void
 SystemController::set_active(bool active)
 {
-  setCheckState(0, active? Qt::Checked : Qt::Unchecked);
+  setCheckState(0, active ? Qt::Checked : Qt::Unchecked);
 }
 
 void
 SystemController::set_log_all(bool log)
 {
   for (auto & topic : topics_) {
-    topic.second.item->setCheckState(2, log? Qt::Checked : Qt::Unchecked);
+    topic.second.item->setCheckState(2, log ? Qt::Checked : Qt::Unchecked);
   }
 }
 
@@ -102,10 +103,11 @@ SystemController::start_capture(const std::string & output_dir, CaptureMode mode
     for (auto & topic : topics_) {
       if (topic.second.item->checkState(2) == Qt::Checked) {
         auto topics_info = node_->get_publishers_info_by_topic(topic.first);
-      
+
         if (!topics_info.empty()) {
-          topic.second.sub_ = create_csv_writer(topic.first, topics_info.front().topic_type(),
-          output_dir);
+          topic.second.sub_ = create_csv_writer(
+            topic.first, topics_info.front().topic_type(),
+            output_dir);
         }
       }
     }
@@ -120,7 +122,7 @@ SystemController::create_csv_writer(
 {
   auto output_file = std::make_shared<std::ofstream>();
   mkdir((output_dir + "/" + get_name()).c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-  
+
   std::string output_file_name = topic + ".csv";
   std::replace(output_file_name.begin(), output_file_name.end(), '/', '_');
   output_file_name = output_dir + "/" + get_name() + "/" + output_file_name;
@@ -130,7 +132,7 @@ SystemController::create_csv_writer(
   if (msg_type == "sensor_msgs/msg/Imu") {
     return node_->create_subscription<sensor_msgs::msg::Imu>(
       topic, rclcpp::SensorDataQoS().keep_all(),
-      [=](const sensor_msgs::msg::Imu::SharedPtr msg) {
+      [ = ](const sensor_msgs::msg::Imu::SharedPtr msg) {
         *output_file << msg << std::endl;
       });
   } else {  // ToDo(fmrico): Repeat previous block for each supported msg type
@@ -149,4 +151,3 @@ SystemController::stop_mocap()
 }
 
 }  // namespace rqt_mocap_control
-

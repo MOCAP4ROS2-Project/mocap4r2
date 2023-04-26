@@ -37,7 +37,8 @@
 #include "rqt_mocap_control/SystemController.hpp"
 #include "rclcpp/rclcpp.hpp"
 
-namespace rqt_mocap_control {
+namespace rqt_mocap_control
+{
 
 
 class MocapControl
@@ -47,29 +48,29 @@ class MocapControl
   Q_OBJECT
 
 public:
-
   MocapControl();
 
-  virtual void initPlugin(qt_gui_cpp::PluginContext& context);
+  virtual void initPlugin(qt_gui_cpp::PluginContext & context);
 
   virtual void shutdownPlugin();
 
-  virtual void saveSettings(qt_gui_cpp::Settings& plugin_settings, qt_gui_cpp::Settings& instance_settings) const;
+  virtual void saveSettings(
+    qt_gui_cpp::Settings & plugin_settings,
+    qt_gui_cpp::Settings & instance_settings) const;
 
-  virtual void restoreSettings(const qt_gui_cpp::Settings& plugin_settings, const qt_gui_cpp::Settings& instance_settings);
+  virtual void restoreSettings(
+    const qt_gui_cpp::Settings & plugin_settings,
+    const qt_gui_cpp::Settings & instance_settings);
 
 protected slots:
-
   // virtual void updateTopicList();
 
 protected:
-
   // virtual QSet<QString> getTopics(const QSet<QString>& message_types, const QSet<QString>& message_sub_types, const QList<QString>& transports);
 
   // virtual void selectTopic(const QString& topic);
 
 protected slots:
-
   void start_capture();
   void select_output_dir();
   void select_record_all(bool checked);
@@ -77,53 +78,52 @@ protected slots:
   void enable_ros1(int state);
   void spin_loop();
   // virtual void onTopicChanged(int index);
-// 
-  // virtual void onZoom1(bool checked);
-// 
-  // virtual void onDynamicRange(bool checked);
-// 
-  // virtual void saveImage();
-// 
-  // virtual void updateNumGridlines();
-// 
-  // virtual void onMousePublish(bool checked);
-// 
-  // virtual void onMouseLeft(int x, int y);
-// 
-  // virtual void onPubTopicChanged();
-// 
-  // virtual void onHideToolbarChanged(bool hide);
-// 
-  // virtual void onRotateLeft();
-  // virtual void onRotateRight();
+//
+// virtual void onZoom1(bool checked);
+//
+// virtual void onDynamicRange(bool checked);
+//
+// virtual void saveImage();
+//
+// virtual void updateNumGridlines();
+//
+// virtual void onMousePublish(bool checked);
+//
+// virtual void onMouseLeft(int x, int y);
+//
+// virtual void onPubTopicChanged();
+//
+// virtual void onHideToolbarChanged(bool hide);
+//
+// virtual void onRotateLeft();
+// virtual void onRotateRight();
 
 protected:
-
   // virtual void callbackImage(const sensor_msgs::msg::Image::ConstSharedPtr& msg);
-// 
-  // virtual void invertPixels(int x, int y);
-// 
-  // QList<int> getGridIndices(int size) const;
-// 
-  // virtual void overlayGrid();
+//
+// virtual void invertPixels(int x, int y);
+//
+// QList<int> getGridIndices(int size) const;
+//
+// virtual void overlayGrid();
 
   Ui::mocapControlWidget ui_;
 
-  QWidget* widget_;
+  QWidget * widget_;
 
   // image_transport::Subscriber subscriber_;
 
 private:
   rclcpp::Subscription<mocap_control_msgs::msg::MocapInfo>::SharedPtr mocap_env_sub_;
-  std::map<std::string, SystemController*> mocap_env_;
+  std::map<std::string, SystemController *> mocap_env_;
 
   std::shared_ptr<mocap_control::ControllerNode> controller_node_;
-  QTimer *controller_spin_timer_;
+  QTimer * controller_spin_timer_;
   bool capturing_ {false};
 
   void update_tree(const mocap_control_msgs::msg::MocapInfo::SharedPtr msg);
   void control_callback(const mocap_control_msgs::msg::Control::SharedPtr msg);
-  
+
   void start_roscore_bridges();
   pid_t pid_roscore_ {0}, pid_bridge1_{0}, pid_bridge2_{0};
 
