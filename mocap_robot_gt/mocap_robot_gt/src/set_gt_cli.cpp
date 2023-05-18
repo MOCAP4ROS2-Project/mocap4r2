@@ -28,12 +28,12 @@ int main(int argc, char * argv[])
     std::cerr << "\tset_gt_cli x y z roll ptch yaw\t# Set GT origin to a pos" << std::endl;
   } else {
     auto set_gt_node = std::make_shared<mocap_robot_gt::SetGTNode>();
-  
+
     std::vector<double> coords(argc - 1, 0.0);
     for (int i = 0; i < argc - 1; i++) {
       coords[i] = atof(argv[i + 1]);
     }
-    set_gt_node->set_gt(coords);;
+    set_gt_node->set_gt(coords);
   }
 
   rclcpp::shutdown();

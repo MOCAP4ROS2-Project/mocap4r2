@@ -33,10 +33,11 @@
 
 #include "rqt_mocap_control/SystemController.hpp"
 
-namespace rqt_mocap_control {
+namespace rqt_mocap_control
+{
 
 MocapControl::MocapControl()
-  : rqt_gui_cpp::Plugin()
+: rqt_gui_cpp::Plugin()
   , widget_(0)
 {
   setObjectName("MocapControl");
@@ -44,14 +45,15 @@ MocapControl::MocapControl()
   current_output_dir_ = "/tmp";
 }
 
-void MocapControl::initPlugin(qt_gui_cpp::PluginContext& context)
+void MocapControl::initPlugin(qt_gui_cpp::PluginContext & context)
 {
   widget_ = new QWidget();
   ui_.setupUi(widget_);
 
-  if (context.serialNumber() > 1)
-  {
-    widget_->setWindowTitle(widget_->windowTitle() + " (" + QString::number(context.serialNumber()) + ")");
+  if (context.serialNumber() > 1) {
+    widget_->setWindowTitle(
+      widget_->windowTitle() + " (" + QString::number(
+        context.serialNumber()) + ")");
   }
   context.addWidget(widget_);
 
@@ -65,7 +67,7 @@ void MocapControl::initPlugin(qt_gui_cpp::PluginContext& context)
   controller_spin_timer_->start(10);
 
   // Add tf and tf_static
-  auto system_item =  new SystemController(controller_node_, "System");
+  auto system_item = new SystemController(controller_node_, "System");
   system_item->add_topic("tf");
   system_item->add_topic("tf_static");
   mocap_env_[system_item->get_name()] = system_item;
@@ -77,11 +79,11 @@ void MocapControl::initPlugin(qt_gui_cpp::PluginContext& context)
 
   mocap_env_sub_ = node_->create_subscription<mocap_control_msgs::msg::MocapInfo>(
     "mocap_environment", rclcpp::QoS(1000).reliable().transient_local().keep_all(),
-    [this] (const mocap_control_msgs::msg::MocapInfo::SharedPtr msg)
+    [this](const mocap_control_msgs::msg::MocapInfo::SharedPtr msg)
     {
       update_tree(msg);
     });
-  
+
   connect(ui_.startButton, SIGNAL(clicked()), this, SLOT(start_capture()));
   connect(ui_.selectOutputDirpushButton, SIGNAL(clicked()), this, SLOT(select_output_dir()));
   connect(ui_.recordAllCheckBox, SIGNAL(clicked(bool)), this, SLOT(select_record_all(bool)));
@@ -98,13 +100,17 @@ void MocapControl::spin_loop()
   rclcpp::spin_some(controller_node_);
 }
 
-void MocapControl::saveSettings(qt_gui_cpp::Settings& plugin_settings, qt_gui_cpp::Settings& instance_settings) const
+void MocapControl::saveSettings(
+  qt_gui_cpp::Settings & plugin_settings,
+  qt_gui_cpp::Settings & instance_settings) const
 {
   (void)plugin_settings;
   (void)instance_settings;
 }
 
-void MocapControl::restoreSettings(const qt_gui_cpp::Settings& plugin_settings, const qt_gui_cpp::Settings& instance_settings)
+void MocapControl::restoreSettings(
+  const qt_gui_cpp::Settings & plugin_settings,
+  const qt_gui_cpp::Settings & instance_settings)
 {
   (void)plugin_settings;
   (void)instance_settings;
@@ -113,12 +119,12 @@ void MocapControl::restoreSettings(const qt_gui_cpp::Settings& plugin_settings, 
 void
 MocapControl::update_tree(const mocap_control_msgs::msg::MocapInfo::SharedPtr msg)
 {
-  SystemController *current_system;
+  SystemController * current_system;
   if (mocap_env_.find(msg->mocap_source) == mocap_env_.end()) {
-    current_system = new SystemController(node_,msg->mocap_source);
+    current_system = new SystemController(node_, msg->mocap_source);
     mocap_env_[current_system->get_name()] = current_system;
     ui_.treeWidget->addTopLevelItem(current_system);
-    
+
   } else {
     current_system = mocap_env_[msg->mocap_source];
   }
@@ -136,7 +142,8 @@ MocapControl::update_tree(const mocap_control_msgs::msg::MocapInfo::SharedPtr ms
 void
 MocapControl::select_output_dir()
 {
-  auto filename = QFileDialog::getExistingDirectory(widget_,
+  auto filename = QFileDialog::getExistingDirectory(
+    widget_,
     tr("Select Output Dir"), tr(current_output_dir_.c_str()));
 
   if (!filename.isEmpty()) {
@@ -155,9 +162,10 @@ MocapControl::start_capture()
         mocap_systems.push_back(system.second->get_name());
       }
     }
-  
-    controller_node_->start_system(ui_.sessionTextEdit->toPlainText().toUtf8().constData(), mocap_systems);
-    
+
+    controller_node_->start_system(
+      ui_.sessionTextEdit->toPlainText().toUtf8().constData(), mocap_systems);
+
     SystemController::CaptureMode mode;
     if (ui_.csvModeRadioButton->isChecked()) {
       mode = SystemController::CSV;
@@ -190,7 +198,7 @@ MocapControl::start_capture()
     ui_.startButton->setPalette(pal);
     ui_.startButton->update();
   }
-}  
+}
 
 void
 MocapControl::control_callback(const mocap_control_msgs::msg::Control::SharedPtr msg)
@@ -199,8 +207,8 @@ MocapControl::control_callback(const mocap_control_msgs::msg::Control::SharedPtr
     msg->control_type == mocap_control_msgs::msg::Control::ACK_STOP)
   {
     double elapsed = (node_->now() - msg->stamp).seconds();
-    
-    if(mocap_env_.find(msg->mocap_source) != mocap_env_.end()) {
+
+    if (mocap_env_.find(msg->mocap_source) != mocap_env_.end()) {
       mocap_env_[msg->mocap_source]->update_elapsed_ts(elapsed);
     }
   }
@@ -222,7 +230,7 @@ MocapControl::select_active_all(bool checked)
   }
 }
 
-void  MocapControl::enable_ros1(int state)
+void MocapControl::enable_ros1(int state)
 {
   if (state == 2) {  // QT::Checked
     start_roscore_bridges();
@@ -250,12 +258,14 @@ MocapControl::start_roscore_bridges()
     exit(0);
   }
 
-  sleep (1);  // avoid message for waiting roscore
+  sleep(1);   // avoid message for waiting roscore
 
   pid_bridge1_ = fork();
 
   if (pid_bridge1_ == 0) {
-    execlp("/opt/ros/foxy/bin/ros2", "ros2", "run", "ros1_bridge", "dynamic_bridge", "--bridge-all-1to2-topics", NULL);
+    execlp(
+      "/opt/ros/foxy/bin/ros2", "ros2", "run", "ros1_bridge", "dynamic_bridge",
+      "--bridge-all-1to2-topics", NULL);
     RCLCPP_ERROR(node_->get_logger(), "error executing bridge");
     sleep(1);
     exit(0);

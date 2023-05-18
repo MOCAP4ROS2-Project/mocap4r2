@@ -20,9 +20,10 @@
 #include <iomanip>
 #include "sensor_msgs/msg/imu.hpp"
 
-namespace rqt_mocap_control {
+namespace rqt_mocap_control
+{
 
-std::ostream& operator<<(std::ostream & os, const sensor_msgs::msg::Imu::SharedPtr msg)
+std::ostream & operator<<(std::ostream & os, const sensor_msgs::msg::Imu::SharedPtr msg)
 {
   // ToDo: Complete tranformation
   os << std::setprecision(10) << std::fixed <<

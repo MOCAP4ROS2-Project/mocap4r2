@@ -21,9 +21,10 @@
 
 #include <QTreeWidgetItem>
 
-namespace rqt_mocap_control {
+namespace rqt_mocap_control
+{
 
-struct TopicInfo 
+struct TopicInfo
 {
   QTreeWidgetItem * item;
   rclcpp::SubscriptionBase::SharedPtr sub_;
