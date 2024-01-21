@@ -2,8 +2,8 @@
 Changelog for package mocap_marker_viz_srvs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.3 (2024-01-21)
+------------------
 * Rename mocap to mocap4r2 to meet with REP 144
 * Contributors: Francisco Martín Rico
 
