@@ -1,8 +1,8 @@
 # MOCAP4ROS2 
 
 [![GitHub Action
-Status](https://github.com/MOCAP4ROS2-Project/mocap/workflows/main/badge.svg)](https://github.com/MOCAP4ROS2-Project/mocap)
-[![codecov](https://codecov.io/gh/MOCAP4ROS2-Project/mocap/main/graph/badge.svg)](https://codecov.io/gh/MOCAP4ROS2-Project/mocap)
+Status](https://github.com/MOCAP4ROS2-Project/mocap/workflows/rolling/badge.svg)](https://github.com/MOCAP4ROS2-Project/mocap)
+[![codecov](https://codecov.io/gh/MOCAP4ROS2-Project/mocap/rolling/graph/badge.svg)](https://codecov.io/gh/MOCAP4ROS2-Project/mocap)
 
 This project provides support for ROS2 integration with Vicon cameras (MOCAP systems based on vision) and Technaid TechMCS IMUs (MOCAP systems based on motion sensors).
 
@@ -26,6 +26,6 @@ research and innovation programme under grant agreement no. 732287.
 ***
 
 <p align="center"> 
-<img align="center" src="https://github.com/MOCAP4ROS2-Project/mocap4ros2_exp_and_resources/blob/main/resources/mocap4ros_arch.png" 
+<img align="center" src="https://github.com/MOCAP4ROS2-Project/mocap4ros2_exp_and_resources/blob/rolling/resources/mocap4ros_arch.png" 
     alt="mocap4ros_arch" width="100%">
 </p>
