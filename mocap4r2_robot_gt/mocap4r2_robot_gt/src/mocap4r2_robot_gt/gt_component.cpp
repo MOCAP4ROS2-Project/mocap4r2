@@ -46,12 +46,8 @@ GTNode::GTNode(const rclcpp::NodeOptions & options)
 
   declare_parameter<std::string>("root_frame", "odom");
   declare_parameter<std::string>("robot_frame", "base_footprint");
-<<<<<<< HEAD:mocap_robot_gt/mocap_robot_gt/src/mocap_robot_gt/gt_component.cpp
   declare_parameter<std::string>("mocap_frame", "base_mocap");
-  declare_parameter<std::vector<double>>("init_mocap_xyzrpy", {0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
-=======
   declare_parameter<std::vector<double>>("init_mocap4r2_xyzrpy", {0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
->>>>>>> rolling:mocap4r2_robot_gt/mocap4r2_robot_gt/src/mocap4r2_robot_gt/gt_component.cpp
 
   get_parameter("root_frame", root_frame_);
   get_parameter("robot_frame", robot_frame_);
