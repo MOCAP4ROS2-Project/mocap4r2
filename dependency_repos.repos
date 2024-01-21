@@ -1,5 +1,5 @@
 repositories:
-  mocap_msgs:
+  mocap4r2_msgs:
     type: git
-    url: https://github.com/MOCAP4ROS2-Project/mocap_msgs.git
+    url: https://github.com/MOCAP4ROS2-Project/mocap4r2_msgs.git
     version: master
