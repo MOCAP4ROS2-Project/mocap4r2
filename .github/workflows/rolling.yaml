@@ -17,11 +17,11 @@ jobs:
       fail-fast: false
     steps:
       - name: Setup ROS 2
-        uses: ros-tooling/setup-ros@0.3.4
+        uses: ros-tooling/setup-ros@0.7.1
         with:
           required-ros-distributions: humble
       - name: build and test
-        uses: ros-tooling/action-ros-ci@0.2.6
+        uses: ros-tooling/action-ros-ci@0.3.5
         with:
           package-name: mocap4r2_control mocap4r2_control_msgs rqt_mocap4r2_control mocap4r2_marker_publisher mocap4r2_marker_viz mocap4r2_marker_viz_srvs
           target-ros2-distro: humble
