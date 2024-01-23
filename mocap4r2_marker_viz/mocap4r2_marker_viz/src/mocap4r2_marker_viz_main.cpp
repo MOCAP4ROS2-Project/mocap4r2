@@ -1,4 +1,5 @@
 // Copyright 2020 National Institute of Advanced Industrial Science and Technology, Japan
+// Copyright 2024 Intelligent Robotics Lab
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,6 +14,7 @@
 // limitations under the License.
 //
 // Author: Floris Erich <floris.erich@aist.go.jp>
+// Author: Jose Miguel Guerrero Hernandez <josemiguel.guerrero@urjc.es>
 
 #include <iostream>
 #include <memory>

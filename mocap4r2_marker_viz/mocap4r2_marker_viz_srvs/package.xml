@@ -4,7 +4,7 @@
   <name>mocap4r2_marker_viz_srvs</name>
   <version>0.0.5</version>
   <description>Service definitions for the marker visualization node</description>
-  <maintainer email="floris.erich@aist.go.jp">floris</maintainer>
+  <maintainer email="fmrico@gmail.com">Francisco Martín</maintainer>
   <license>BSD</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
