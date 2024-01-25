@@ -76,7 +76,7 @@ GTNode::rigid_bodies_callback(const mocap4r2_msgs::msg::RigidBodies::SharedPtr m
     } catch (const tf2::TransformException & e) {
       RCLCPP_WARN(
         get_logger(), "Transform %s->%s exception: [%s]",
-          mocap_frame_.c_str(), robot_frame_.c_str(), e.what());
+        mocap_frame_.c_str(), robot_frame_.c_str(), e.what());
     }
   } else {
     mocap2gtbody_.setOrigin(
