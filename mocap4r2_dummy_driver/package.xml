@@ -6,8 +6,7 @@
   <description>
      This is a MOCAP4ROS2 Dummy driver for testing.
   </description>
-  <author>Francisco Martín Rico</author>
-  <maintainer email="fmrico@gmail.com">Francisco Martín Rico</maintainer>
+  <maintainer email="fmrico@gmail.com">Francisco Martín</maintainer>
 
   <license>Apache License, Version 2.0</license>
 
