@@ -97,7 +97,7 @@ DummyDriverNode::publish_data()
     msg_rb.header.stamp = now();
     msg_rb.header.frame_id = "mocap";
     msg_rb.frame_number = frame_number_;
-    
+
     mocap4r2_msgs::msg::RigidBody rb;
     rb.rigid_body_name = "rigid_body_0";
     rb.pose.position.x = 0.0;

@@ -21,6 +21,7 @@ set(srv_files
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${srv_files}
+  DEPENDENCIES std_msgs
   ADD_LINTER_TESTS
 )
 
