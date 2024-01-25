@@ -2,6 +2,11 @@
 Changelog for package mocap4r2_marker_viz_srvs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.0.7 (2024-01-25)
+------------------
+* Fix compilation
+* Contributors: Francisco Martín Rico
+
 0.0.6 (2024-01-23)
 ------------------
 
