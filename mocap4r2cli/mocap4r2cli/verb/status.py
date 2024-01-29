@@ -12,25 +12,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from lifecycle_msgs.msg import State as LCState
+
 from ros2cli.node.strategy import add_arguments
 from ros2cli.node.strategy import NodeStrategy
-from mocap4r2cli.api import get_mocap4r2_status
-from mocap4r2cli.verb import VerbExtension
-
+from mocap4r2cli.verb import VerbExtension, get_lc_status, get_mocap_systems
 
 class StatusVerb(VerbExtension):
     """Prints the status of the MOCAP4ROS2 systems."""
 
     def add_arguments(self, parser, cli_name):
         add_arguments(parser)
-        
-        pass
-        # parser.add_argument(
-        #           '--simple', '-s', action='store_true',
-        #           help="Display the message in a simple form.")
 
     def main(self, *, args):
         with NodeStrategy(args) as node:
-            status = get_mocap4r2_status(node=node)
-        
-        print(status)
+            mocap_systems = get_mocap_systems(node)
+            
+            for mocap_system in mocap_systems:
+                lc_status, ok = get_lc_status(node, mocap_system)
+
+                if ok:
+                    status = 'UNKNOWN'
+                    if lc_status.id == LCState.PRIMARY_STATE_UNKNOWN or lc_status.id == LCState.PRIMARY_STATE_FINALIZED:
+                        status = 'NOT READY'
+                    elif lc_status.id == LCState.PRIMARY_STATE_UNCONFIGURED:
+                        status = 'NOT YET AVAILABLE'
+                    elif lc_status.id == LCState.PRIMARY_STATE_INACTIVE:
+                        status = 'READY'
+                    elif lc_status.id == LCState.PRIMARY_STATE_ACTIVE:
+                        status = 'ACTIVE'
+                    print(mocap_system + '\t' + status)
+                else:
+                    print(mocap_system + '\tERROR')

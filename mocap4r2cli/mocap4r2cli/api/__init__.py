@@ -13,8 +13,14 @@
 # limitations under the License.
 
 from ros2cli.node.strategy import NodeStrategy
+from mocap4r2cli.verb import get_mocap_systems
 
-def get_mocap4r2_status(*, node):
-    node_names_and_namespaces = node.get_node_names_and_namespaces()
-    return node_names_and_namespaces
+class MocapNameCompleter:
+    """Callable returning a list of MOCAP4ROS2 system names."""
 
+    def __init__(self):
+        pass
+
+    def __call__(self, prefix, parsed_args, **kwargs):
+        with NodeStrategy(parsed_args) as node:
+            return get_mocap_systems(node)

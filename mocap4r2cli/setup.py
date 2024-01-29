@@ -45,6 +45,8 @@ The package provides the mocap4r2 command as a plugin for MOCAP4ROS2 Project."""
         ],
         'mocap4r2cli.verb': [
             'status = mocap4r2cli.verb.status:StatusVerb',
+            'start = mocap4r2cli.verb.start:StartVerb',
+            'stop = mocap4r2cli.verb.stop:StopVerb',
         ],
     }
 )
