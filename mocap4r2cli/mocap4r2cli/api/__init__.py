@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ros2cli.node.strategy import NodeStrategy
 from mocap4r2cli.verb import get_mocap_systems
+from ros2cli.node.strategy import NodeStrategy
+
 
 class MocapNameCompleter:
     """Callable returning a list of MOCAP4ROS2 system names."""

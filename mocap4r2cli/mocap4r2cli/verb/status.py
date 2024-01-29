@@ -14,9 +14,11 @@
 
 from lifecycle_msgs.msg import State as LCState
 
+from mocap4r2cli.verb import get_lc_status, get_mocap_systems, VerbExtension
+
 from ros2cli.node.strategy import add_arguments
 from ros2cli.node.strategy import NodeStrategy
-from mocap4r2cli.verb import VerbExtension, get_lc_status, get_mocap_systems
+
 
 class StatusVerb(VerbExtension):
     """Prints the status of the MOCAP4ROS2 systems."""
@@ -27,13 +29,14 @@ class StatusVerb(VerbExtension):
     def main(self, *, args):
         with NodeStrategy(args) as node:
             mocap_systems = get_mocap_systems(node)
-            
+
             for mocap_system in mocap_systems:
                 lc_status, ok = get_lc_status(node, mocap_system)
 
                 if ok:
                     status = 'UNKNOWN'
-                    if lc_status.id == LCState.PRIMARY_STATE_UNKNOWN or lc_status.id == LCState.PRIMARY_STATE_FINALIZED:
+                    if (lc_status.id == LCState.PRIMARY_STATE_UNKNOWN or
+                            lc_status.id == LCState.PRIMARY_STATE_FINALIZED):
                         status = 'NOT READY'
                     elif lc_status.id == LCState.PRIMARY_STATE_UNCONFIGURED:
                         status = 'NOT YET AVAILABLE'

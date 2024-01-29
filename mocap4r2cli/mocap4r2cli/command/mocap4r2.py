@@ -15,6 +15,7 @@
 from ros2cli.command import add_subparsers_on_demand
 from ros2cli.command import CommandExtension
 
+
 class Mocap4r2Command(CommandExtension):
     """Various mocap4r2 related sub-commands."""
 

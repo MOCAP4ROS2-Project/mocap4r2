@@ -12,25 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ros2cli.plugin_system import PLUGIN_SYSTEM_VERSION
-from ros2cli.plugin_system import satisfies_version
-
-import rclpy
-from rclpy.lifecycle import State
-from rclpy.time import Time
-from rclpy.qos import QoSProfile, QoSDurabilityPolicy
 
 from lifecycle_msgs.srv import GetState
 
-from mocap4r2_control_msgs.msg import MocapInfo
 from mocap4r2_control_msgs.msg import Control
+from mocap4r2_control_msgs.msg import MocapInfo
+
+import rclpy
+from rclpy.qos import QoSDurabilityPolicy, QoSProfile
+
+from ros2cli.plugin_system import PLUGIN_SYSTEM_VERSION
+from ros2cli.plugin_system import satisfies_version
 
 
 def get_mocap_systems(node):
-    clock = node.get_clock()    
+    clock = node.get_clock()
     start_time = clock.now()
     elapsed = clock.now() - start_time
-    
+
     qos_profile = QoSProfile(
                 durability=QoSDurabilityPolicy.TRANSIENT_LOCAL,
                 depth=10)
@@ -39,7 +38,7 @@ def get_mocap_systems(node):
     node.create_subscription(
         MocapInfo,
         '/mocap4r2_environment',
-        lambda msg: mocap_systems.append(msg.mocap4r2_source), 
+        lambda msg: mocap_systems.append(msg.mocap4r2_source),
         qos_profile)
 
     while rclpy.ok() and elapsed.nanoseconds / 1e9 < 0.5:
@@ -48,29 +47,34 @@ def get_mocap_systems(node):
 
     return mocap_systems
 
+
 def get_lc_status(node, mocap_lc_node):
     srv_name = '/' + mocap_lc_node + '/get_state'
     srv = node.create_client(GetState, srv_name)
-    
+
     if not srv.wait_for_service(timeout_sec=1.0):
-        node.get_logger().error('Mocap System ' + mocap_lc_node +  ' does not support MOCAP4ROS2 Control System')
+        node.get_logger().error('Mocap System ' + mocap_lc_node +
+                                ' does not support MOCAP4ROS2 Control System')
         return (None, False)
-    
+
     req = GetState.Request()
 
     future = srv.call_async(req)
     rclpy.spin_until_future_complete(node, future)
-    
+
     return (future.result().current_state, True)
+
 
 def send_start_control(node, mocap_lc_node):
     return send_control(node, mocap_lc_node, Control.START, Control.ACK_START)
 
+
 def send_stop_control(node, mocap_lc_node):
     return send_control(node, mocap_lc_node, Control.STOP, Control.ACK_STOP)
 
+
 def send_control(node, mocap_lc_node, command, ack_command):
-    clock = node.get_clock()    
+    clock = node.get_clock()
     start_time = clock.now()
     elapsed = clock.now() - start_time
 
@@ -97,7 +101,6 @@ def send_control(node, mocap_lc_node, command, ack_command):
     ok = response[0].control_type == ack_command and response[0].mocap4r2_source == mocap_lc_node
 
     return ok
-
 
 
 class VerbExtension:

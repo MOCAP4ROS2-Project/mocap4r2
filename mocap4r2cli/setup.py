@@ -1,10 +1,6 @@
 from setuptools import find_packages
 from setuptools import setup
 
-
-from setuptools import find_packages
-from setuptools import setup
-
 package_name = 'mocap4r2cli'
 
 setup(
