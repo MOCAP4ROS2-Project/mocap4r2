@@ -44,16 +44,12 @@ void
 DummyDriverNode::control_start(const mocap4r2_control_msgs::msg::Control::SharedPtr msg)
 {
   (void)msg;
-  trigger_transition(
-    rclcpp_lifecycle::Transition(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE));
 }
 
 void
 DummyDriverNode::control_stop(const mocap4r2_control_msgs::msg::Control::SharedPtr msg)
 {
   (void)msg;
-  trigger_transition(
-    rclcpp_lifecycle::Transition(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE));
 }
 
 
