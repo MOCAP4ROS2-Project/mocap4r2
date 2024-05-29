@@ -52,11 +52,11 @@ private:
   void rb_callback(const mocap4r2_msgs::msg::RigidBodies::SharedPtr msg) const;
 
   visualization_msgs::msg::Marker marker2visual(
-    int index, const geometry_msgs::msg::Point & translation, 
+    int index, const geometry_msgs::msg::Point & translation,
     const std_msgs::msg::Header & header) const;
 
   visualization_msgs::msg::Marker rb2visual(
-    int index, const geometry_msgs::msg::Pose & poserb, 
+    int index, const geometry_msgs::msg::Pose & poserb,
     const std_msgs::msg::Header & header) const;
 
   geometry_msgs::msg::Pose mocap2rviz(const geometry_msgs::msg::Pose mocap4r2_pose) const;
