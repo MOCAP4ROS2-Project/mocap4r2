@@ -36,8 +36,6 @@ MarkerVisualizer::MarkerVisualizer()
   declare_parameter<double>("marker_scale_y", 0.014f);
   declare_parameter<double>("marker_scale_z", 0.014f);
   declare_parameter<float>("marker_lifetime", 0.01f);
-  declare_parameter<bool>("use_header", false);
-  declare_parameter<std::string>("marker_frame", "map");
   declare_parameter<std::string>("namespace", "mocap4r2_markers");
   declare_parameter<std::string>("mocap4r2_system", "optitrack");
 
@@ -48,9 +46,7 @@ MarkerVisualizer::MarkerVisualizer()
   get_parameter<double>("marker_scale_x", marker_scale_.x);
   get_parameter<double>("marker_scale_y", marker_scale_.y);
   get_parameter<double>("marker_scale_z", marker_scale_.z);
-  get_parameter<bool>("use_header", use_header_);
-  get_parameter<std::string>("marker_frame", marker_frame_);
-  get_parameter<std::string>("marker_frame", marker_frame_);
+  get_parameter<float>("marker_lifetime", marker_lifetime_);
   get_parameter<std::string>("namespace", namespace_);
   get_parameter<std::string>("mocap4r2_system", mocap4r2_system_);
 
@@ -108,15 +104,11 @@ MarkerVisualizer::marker_callback(const mocap4r2_msgs::msg::Markers::SharedPtr m
 }
 
 visualization_msgs::msg::Marker
-MarkerVisualizer::marker2visual(int index, const geometry_msgs::msg::Point & translation, const std_msgs::msg::Header  & header) const
+MarkerVisualizer::marker2visual(int index, const geometry_msgs::msg::Point & translation,
+                                const std_msgs::msg::Header  & header) const
 {
   visualization_msgs::msg::Marker viz_marker;
-  if (use_header_){
-    viz_marker.header = header;
-  } else {
-    viz_marker.header.frame_id = marker_frame_;
-    viz_marker.header.stamp = rclcpp::Clock().now();
-  }
+  viz_marker.header = header;
   viz_marker.ns = namespace_;
   viz_marker.color = default_marker_color_;
   viz_marker.id = index;
@@ -131,7 +123,7 @@ MarkerVisualizer::marker2visual(int index, const geometry_msgs::msg::Point & tra
   marker_pose.orientation.w = 1.0f;
   viz_marker.pose = mocap2rviz(marker_pose);
   viz_marker.scale = marker_scale_;
-  viz_marker.lifetime = rclcpp::Duration(1s);
+  viz_marker.lifetime = rclcpp::Duration::from_seconds(marker_lifetime_);
   return viz_marker;
 }
 
@@ -151,7 +143,8 @@ MarkerVisualizer::rb_callback(const mocap4r2_msgs::msg::RigidBodies::SharedPtr m
     visual_markers_rb.markers.push_back(rb2visual(counter_rb++, rb.pose, msg->header));
 
     for (const mocap4r2_msgs::msg::Marker & marker : rb.markers) {
-      visual_markers_rb.markers.push_back(marker2visual(counter_markers_rb++, marker.translation, msg->header));
+      visual_markers_rb.markers.push_back(marker2visual(counter_markers_rb++, 
+                                                        marker.translation, msg->header));
     }
   }
 
@@ -160,15 +153,11 @@ MarkerVisualizer::rb_callback(const mocap4r2_msgs::msg::RigidBodies::SharedPtr m
 
 
 visualization_msgs::msg::Marker
-MarkerVisualizer::rb2visual(int index, const geometry_msgs::msg::Pose & poserb,  const std_msgs::msg::Header  & header) const
+MarkerVisualizer::rb2visual(int index, const geometry_msgs::msg::Pose & poserb,  
+                            const std_msgs::msg::Header  & header) const
 {
   visualization_msgs::msg::Marker viz_marker;
-  if (use_header_){
-    viz_marker.header = header;
-  } else {
-    viz_marker.header.frame_id = marker_frame_;
-    viz_marker.header.stamp = rclcpp::Clock().now();
-  }  
+  viz_marker.header = header;
   viz_marker.ns = namespace_;
   viz_marker.color = default_marker_color_;
   viz_marker.id = index;
@@ -183,6 +172,6 @@ MarkerVisualizer::rb2visual(int index, const geometry_msgs::msg::Pose & poserb, 
   marker_scale_.y = 0.014f;
   marker_scale_.z = 0.014f;
   viz_marker.scale = marker_scale_;
-  viz_marker.lifetime = rclcpp::Duration(0.1s);
+  viz_marker.lifetime = rclcpp::Duration::from_seconds(marker_lifetime_);
   return viz_marker;
 }
