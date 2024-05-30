@@ -104,8 +104,9 @@ MarkerVisualizer::marker_callback(const mocap4r2_msgs::msg::Markers::SharedPtr m
 }
 
 visualization_msgs::msg::Marker
-MarkerVisualizer::marker2visual(int index, const geometry_msgs::msg::Point & translation,
-                                const std_msgs::msg::Header  & header) const
+MarkerVisualizer::marker2visual(
+  int index, const geometry_msgs::msg::Point & translation,
+  const std_msgs::msg::Header & header) const
 {
   visualization_msgs::msg::Marker viz_marker;
   viz_marker.header = header;
@@ -143,8 +144,10 @@ MarkerVisualizer::rb_callback(const mocap4r2_msgs::msg::RigidBodies::SharedPtr m
     visual_markers_rb.markers.push_back(rb2visual(counter_rb++, rb.pose, msg->header));
 
     for (const mocap4r2_msgs::msg::Marker & marker : rb.markers) {
-      visual_markers_rb.markers.push_back(marker2visual(counter_markers_rb++,
-                                                        marker.translation, msg->header));
+      visual_markers_rb.markers.push_back(
+        marker2visual(
+          counter_markers_rb++,
+          marker.translation, msg->header));
     }
   }
 
@@ -153,8 +156,9 @@ MarkerVisualizer::rb_callback(const mocap4r2_msgs::msg::RigidBodies::SharedPtr m
 
 
 visualization_msgs::msg::Marker
-MarkerVisualizer::rb2visual(int index, const geometry_msgs::msg::Pose & poserb,
-                            const std_msgs::msg::Header  & header) const
+MarkerVisualizer::rb2visual(
+  int index, const geometry_msgs::msg::Pose & poserb,
+  const std_msgs::msg::Header & header) const
 {
   visualization_msgs::msg::Marker viz_marker;
   viz_marker.header = header;
