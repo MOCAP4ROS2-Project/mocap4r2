@@ -14,6 +14,7 @@
 //
 // Author: David Vargas Frutos <david.vargas@urjc.es>
 // Author: Jose Miguel Guerrero Hernandez <josemiguel.guerrero@urjc.es>
+// Modified by: Alberto García @aaggj
 
 #include <string>
 
@@ -50,11 +51,11 @@ MarkerVisualizer::MarkerVisualizer()
   get_parameter<std::string>("namespace", namespace_);
   get_parameter<std::string>("mocap4r2_system", mocap4r2_system_);
 
-  markers_subscription_ = this->create_subscription<mocap4r2_msgs::msg::Markers>(
+  markers_subscription_ = this->create_subscription<mocap_interfaces::msg::MarkerArray>(
     "markers", 1000, std::bind(&MarkerVisualizer::marker_callback, this, _1));
 
   // Rigid bodies
-  markers_subscription_rb_ = this->create_subscription<mocap4r2_msgs::msg::RigidBodies>(
+  markers_subscription_rb_ = this->create_subscription<mocap_interfaces::msg::RigidBodyArray>(
     "rigid_bodies", 1000, std::bind(&MarkerVisualizer::rb_callback, this, _1));
 
   publisher_rb_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(
@@ -89,7 +90,7 @@ const
 
 
 void
-MarkerVisualizer::marker_callback(const mocap4r2_msgs::msg::Markers::SharedPtr msg) const
+MarkerVisualizer::marker_callback(const mocap_interfaces::msg::MarkerArray::SharedPtr msg) const
 {
   if (publisher_->get_subscription_count() == 0) {
     return;
@@ -97,7 +98,7 @@ MarkerVisualizer::marker_callback(const mocap4r2_msgs::msg::Markers::SharedPtr m
 
   static int counter = 0;
   visualization_msgs::msg::MarkerArray visual_markers;
-  for (const mocap4r2_msgs::msg::Marker & marker : msg->markers) {
+  for (const mocap_interfaces::msg::Marker & marker : msg->markers) {
     visual_markers.markers.push_back(marker2visual(counter++, marker.translation, msg->header));
   }
   publisher_->publish(visual_markers);
@@ -130,7 +131,7 @@ MarkerVisualizer::marker2visual(
 
 
 void
-MarkerVisualizer::rb_callback(const mocap4r2_msgs::msg::RigidBodies::SharedPtr msg) const
+MarkerVisualizer::rb_callback(const mocap_interfaces::msg::RigidBodyArray::SharedPtr msg) const
 {
   if (publisher_rb_->get_subscription_count() == 0) {
     return;
@@ -140,10 +141,10 @@ MarkerVisualizer::rb_callback(const mocap4r2_msgs::msg::RigidBodies::SharedPtr m
   static int counter_markers_rb = 0;
   visualization_msgs::msg::MarkerArray visual_markers_rb;
 
-  for (const mocap4r2_msgs::msg::RigidBody & rb : msg->rigidbodies) {
+  for (const mocap_interfaces::msg::RigidBody & rb : msg->rigid_bodies) {
     visual_markers_rb.markers.push_back(rb2visual(counter_rb++, rb.pose, msg->header));
 
-    for (const mocap4r2_msgs::msg::Marker & marker : rb.markers) {
+    for (const mocap_interfaces::msg::Marker & marker : rb.markers) {
       visual_markers_rb.markers.push_back(
         marker2visual(
           counter_markers_rb++,

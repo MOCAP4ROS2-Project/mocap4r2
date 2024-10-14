@@ -1,10 +1,10 @@
-<?xml version="1.0"?>
-<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<?xml version="2.0"?>
 <package format="3">
   <name>mocap4r2_marker_viz</name>
   <version>0.0.7</version>
   <description>Node for visualizing markers</description>
   <maintainer email="fmrico@gmail.com">Francisco Martín</maintainer>
+  <maintainer email="albertogarciagomezjacinto@gmail.com">Alberto García</maintainer>
   <license>BSD</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
@@ -13,6 +13,7 @@
   <depend>visualization_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>mocap4r2_marker_viz_srvs</depend>
+  <depend>mocap_interfaces</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

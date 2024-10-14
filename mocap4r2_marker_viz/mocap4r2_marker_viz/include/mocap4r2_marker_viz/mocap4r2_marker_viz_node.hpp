@@ -14,6 +14,7 @@
 //
 // Author: David Vargas Frutos <david.vargas@urjc.es>
 // Author: Jose Miguel Guerrero Hernandez <josemiguel.guerrero@urjc.es>
+// Modified by: Alberto García @aaggj
 
 #ifndef MOCAP4R2_MARKER_VIZ__MOCAP4R2_MARKER_VIZ_NODE_HPP_
 #define MOCAP4R2_MARKER_VIZ__MOCAP4R2_MARKER_VIZ_NODE_HPP_
@@ -26,10 +27,10 @@
 #include "rclcpp/rclcpp.hpp"
 #include "visualization_msgs/msg/marker_array.hpp"
 
-#include "mocap4r2_msgs/msg/marker.hpp"
-#include "mocap4r2_msgs/msg/markers.hpp"
-#include "mocap4r2_msgs/msg/rigid_body.hpp"
-#include "mocap4r2_msgs/msg/rigid_bodies.hpp"
+#include "mocap_interfaces/msg/marker.hpp"
+#include "mocap_interfaces/msg/marker_array.hpp"
+#include "mocap_interfaces/msg/rigid_body.hpp"
+#include "mocap_interfaces/msg/rigid_body_array.hpp"
 #include "geometry_msgs/msg/vector3.hpp"
 #include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
 #include "mocap4r2_marker_viz_srvs/srv/set_marker_color.hpp"
@@ -48,8 +49,8 @@ public:
   MarkerVisualizer();
 
 private:
-  void marker_callback(const mocap4r2_msgs::msg::Markers::SharedPtr msg) const;
-  void rb_callback(const mocap4r2_msgs::msg::RigidBodies::SharedPtr msg) const;
+  void marker_callback(const mocap_interfaces::msg::MarkerArray::SharedPtr msg) const;
+  void rb_callback(const mocap_interfaces::msg::RigidBodyArray::SharedPtr msg) const;
 
   visualization_msgs::msg::Marker marker2visual(
     int index, const geometry_msgs::msg::Point & translation,
@@ -62,10 +63,10 @@ private:
   geometry_msgs::msg::Pose mocap2rviz(const geometry_msgs::msg::Pose mocap4r2_pose) const;
 
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr publisher_;
-  rclcpp::Subscription<mocap4r2_msgs::msg::Markers>::SharedPtr markers_subscription_;
+  rclcpp::Subscription<mocap_interfaces::msg::MarkerArray>::SharedPtr markers_subscription_;
 
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr publisher_rb_;
-  rclcpp::Subscription<mocap4r2_msgs::msg::RigidBodies>::SharedPtr markers_subscription_rb_;
+  rclcpp::Subscription<mocap_interfaces::msg::RigidBodyArray>::SharedPtr markers_subscription_rb_;
 
   geometry_msgs::msg::Vector3 marker_scale_;
   float marker_lifetime_;
