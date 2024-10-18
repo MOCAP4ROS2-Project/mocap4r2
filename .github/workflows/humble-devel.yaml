@@ -1,12 +1,12 @@
-name: rolling
+name: humble-devel
 
 on:
   pull_request:
     branches:
-      - rolling
+      - humble-devel
   push:
     branches:
-      - rolling
+      - humble-devel
       
 jobs:
   build-and-test:
@@ -27,10 +27,9 @@ jobs:
           target-ros2-distro: humble
           vcs-repo-file-url: https://raw.githubusercontent.com/MOCAP4ROS2-Project/mocap/rolling/dependency_repos.repos
       - name: Codecov
-        uses: codecov/codecov-action@v1.1.0
+        uses: codecov/codecov-action@v1.2.1
         with:
           file: ros_ws/lcov/total_coverage.info
           flags: unittests
           name: codecov-umbrella
-          # yml: ./codecov.yml
           fail_ci_if_error: false
