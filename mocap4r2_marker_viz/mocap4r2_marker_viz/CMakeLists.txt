@@ -24,6 +24,8 @@ find_package(mocap4r2_marker_viz_srvs REQUIRED)
 find_package(mocap4r2_msgs REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
 
 add_executable(mocap4r2_marker_viz src/mocap4r2_marker_viz_main.cpp)
 
@@ -34,7 +36,7 @@ target_include_directories(${PROJECT_NAME}_NODE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
 
-ament_target_dependencies(${PROJECT_NAME}_NODE rclcpp mocap4r2_msgs visualization_msgs geometry_msgs mocap4r2_marker_viz_srvs)
+ament_target_dependencies(${PROJECT_NAME}_NODE rclcpp tf2_geometry_msgs tf2_ros mocap4r2_msgs visualization_msgs geometry_msgs mocap4r2_marker_viz_srvs)
 
 target_link_libraries(mocap4r2_marker_viz ${PROJECT_NAME}_NODE)
 

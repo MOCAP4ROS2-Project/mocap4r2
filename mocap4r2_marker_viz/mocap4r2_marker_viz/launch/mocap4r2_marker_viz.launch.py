@@ -28,10 +28,16 @@ def generate_launch_description():
     rviz_config_file = LaunchConfiguration('rviz_config_file')
     use_namespace = LaunchConfiguration('use_namespace')
     mocap4r2_system = LaunchConfiguration('mocap4r2_system')
+    publish_tf = LaunchConfiguration('publish_tf')
 
     declare_mocap4r2_system = DeclareLaunchArgument(
         'mocap4r2_system',
         default_value='optitrack',
+        description='')
+
+    declare_publish_tf = DeclareLaunchArgument(
+        'publish_tf',
+        default_value='false',
         description='')
 
     declare_rviz_config_file_cmd = DeclareLaunchArgument(
@@ -62,7 +68,8 @@ def generate_launch_description():
         executable='mocap4r2_marker_viz',
         output='both',
         emulate_tty=True,
-        parameters=[{'mocap4r2_system': mocap4r2_system}],
+        parameters=[{'mocap4r2_system': mocap4r2_system},
+                    {'publish_tf': publish_tf}],
     )
 
     # Create the launch description and populate
@@ -74,6 +81,7 @@ def generate_launch_description():
     ld.add_action(declare_rviz_config_file_cmd)
     ld.add_action(declare_use_namespace_cmd)
     ld.add_action(declare_mocap4r2_system)
+    ld.add_action(declare_publish_tf)
     ld.add_action(declare_use_rviz_cmd)
 
     ld.add_action(start_rviz_cmd)

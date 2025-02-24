@@ -16,6 +16,10 @@
 // Author: Jose Miguel Guerrero Hernandez <josemiguel.guerrero@urjc.es>
 
 #include <string>
+#include <vector>
+
+#include "geometry_msgs/msg/transform_stamped.hpp"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 
 #include "mocap4r2_marker_viz/mocap4r2_marker_viz_node.hpp"
 
@@ -38,6 +42,7 @@ MarkerVisualizer::MarkerVisualizer()
   declare_parameter<float>("marker_lifetime", 0.01f);
   declare_parameter<std::string>("namespace", "mocap4r2_markers");
   declare_parameter<std::string>("mocap4r2_system", "optitrack");
+  declare_parameter<bool>("publish_tf", false);
 
   get_parameter<float>("default_marker_color_r", default_marker_color_.r);
   get_parameter<float>("default_marker_color_g", default_marker_color_.g);
@@ -49,6 +54,7 @@ MarkerVisualizer::MarkerVisualizer()
   get_parameter<float>("marker_lifetime", marker_lifetime_);
   get_parameter<std::string>("namespace", namespace_);
   get_parameter<std::string>("mocap4r2_system", mocap4r2_system_);
+  get_parameter<bool>("publish_tf", publish_tf_);
 
   markers_subscription_ = this->create_subscription<mocap4r2_msgs::msg::Markers>(
     "markers", 1000, std::bind(&MarkerVisualizer::marker_callback, this, _1));
@@ -59,6 +65,9 @@ MarkerVisualizer::MarkerVisualizer()
 
   publisher_rb_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(
     "visualization_marker_rb", 1000);
+
+  tf_broadcaster_ =
+      std::make_unique<tf2_ros::TransformBroadcaster>(*this);
 }
 
 
@@ -132,6 +141,23 @@ MarkerVisualizer::marker2visual(
 void
 MarkerVisualizer::rb_callback(const mocap4r2_msgs::msg::RigidBodies::SharedPtr msg) const
 {
+  if (publish_tf_) {
+    std::vector<geometry_msgs::msg::TransformStamped> transforms {};
+    for (const mocap4r2_msgs::msg::RigidBody & rb : msg->rigidbodies) {
+      auto const pose = mocap2rviz(rb.pose);
+      geometry_msgs::msg::TransformStamped transform_stamped {};
+      transform_stamped.header = msg->header;
+
+      tf2::Transform transform {};
+      tf2::fromMsg(pose, transform);
+      tf2::toMsg(transform, transform_stamped.transform);
+
+      transform_stamped.child_frame_id = rb.rigid_body_name;
+      transforms.push_back(transform_stamped);
+    }
+    tf_broadcaster_->sendTransform(transforms);
+  }
+
   if (publisher_rb_->get_subscription_count() == 0) {
     return;
   }

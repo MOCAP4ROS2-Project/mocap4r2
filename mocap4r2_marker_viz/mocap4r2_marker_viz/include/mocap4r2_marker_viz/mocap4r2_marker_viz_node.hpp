@@ -34,6 +34,7 @@
 #include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
 #include "mocap4r2_marker_viz_srvs/srv/set_marker_color.hpp"
 #include "mocap4r2_marker_viz_srvs/srv/reset_marker_color.hpp"
+#include "tf2_ros/transform_broadcaster.h"
 
 typedef mocap4r2_marker_viz_srvs::srv::SetMarkerColor SetMarkerColor;
 typedef mocap4r2_marker_viz_srvs::srv::ResetMarkerColor ResetMarkerColor;
@@ -67,10 +68,13 @@ private:
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr publisher_rb_;
   rclcpp::Subscription<mocap4r2_msgs::msg::RigidBodies>::SharedPtr markers_subscription_rb_;
 
+  std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
+
   geometry_msgs::msg::Vector3 marker_scale_;
   float marker_lifetime_;
   std::string namespace_;
   std::string mocap4r2_system_;
+  bool publish_tf_;
   std_msgs::msg::ColorRGBA default_marker_color_;
   std::map<int, std_msgs::msg::ColorRGBA> marker_color_;
 };
