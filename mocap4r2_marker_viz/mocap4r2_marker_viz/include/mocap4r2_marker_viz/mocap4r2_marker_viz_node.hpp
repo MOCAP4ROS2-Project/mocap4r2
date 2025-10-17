@@ -59,6 +59,10 @@ private:
     int index, const geometry_msgs::msg::Pose & poserb,
     const std_msgs::msg::Header & header) const;
 
+  visualization_msgs::msg::Marker rb_name2visual(
+  int index, const geometry_msgs::msg::Pose & poserb, const std::string & rigid_body_name,
+  const std_msgs::msg::Header & header) const;
+
   geometry_msgs::msg::Pose mocap2rviz(const geometry_msgs::msg::Pose mocap4r2_pose) const;
 
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr publisher_;
