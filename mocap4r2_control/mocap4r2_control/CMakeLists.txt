@@ -27,6 +27,12 @@ set(dependencies
   mocap4r2_control_msgs
 )
 
+set(target_dependencies
+  rclcpp::rclcpp
+  rclcpp_lifecycle::rclcpp_lifecycle
+  ${mocap4r2_control_msgs_TARGETS}
+)
+
 include_directories(include)
 
 add_library(${PROJECT_NAME} SHARED
@@ -34,10 +40,10 @@ add_library(${PROJECT_NAME} SHARED
   src/mocap4r2_control/ControllerNode.cpp
   src/mocap4r2_control/AuxiliarNode.cpp
 )
-ament_target_dependencies(${PROJECT_NAME} ${dependencies})
+target_link_libraries(${PROJECT_NAME} ${target_dependencies})
 
 add_executable(auxiliar_main src/auxiliar_main.cpp)
-ament_target_dependencies(auxiliar_main ${dependencies})
+target_link_libraries(auxiliar_main ${target_dependencies})
 target_link_libraries(auxiliar_main ${PROJECT_NAME})
 
 install(DIRECTORY include/
