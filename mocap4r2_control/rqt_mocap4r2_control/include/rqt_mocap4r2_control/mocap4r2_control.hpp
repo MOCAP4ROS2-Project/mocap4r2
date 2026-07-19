@@ -15,7 +15,7 @@
 #ifndef RQT_MOCAP4R2_CONTROL__MOCAP4R2_CONTROL__HPP_
 #define RQT_MOCAP4R2_CONTROL__MOCAP4R2_CONTROL__HPP_
 
-#include <rqt_gui_cpp/plugin.h>
+#include <rqt_gui_cpp/plugin.hpp>
 
 #include <ui_mocap4r2_control.h>
 
