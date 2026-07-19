@@ -24,7 +24,10 @@ find_package(mocap4r2_msgs REQUIRED)
 
 add_executable(mocap4r2_marker_publisher src/mocap4r2_marker_publisher.cpp)
 
-ament_target_dependencies(mocap4r2_marker_publisher rclcpp mocap4r2_msgs)
+target_link_libraries(mocap4r2_marker_publisher
+  rclcpp::rclcpp
+  ${mocap4r2_msgs_TARGETS}
+)
 
 install(TARGETS
   mocap4r2_marker_publisher
