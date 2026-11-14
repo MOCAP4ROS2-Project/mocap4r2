@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>mocap4r2_motion_tools</name>
+  <version>2.0.0</version>
+  <description>Human motion tools of MOCAP4ROS2: skeleton TF and joint angles, gap filling and zero-phase filtering, and export of recorded sessions to CSV, TUM and C3D</description>
+  <maintainer email="fmrico@gmail.com">Francisco Martín Rico</maintainer>
+  <license>Apache-2.0</license>
+  <url type="website">https://mocap4ros2-project.github.io</url>
+  <url type="repository">https://github.com/MOCAP4ROS2-Project/mocap4r2</url>
+  <url type="bugtracker">https://github.com/MOCAP4ROS2-Project/mocap4r2/issues</url>
+  <author email="fmrico@gmail.com">Francisco Martín Rico</author>
+
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>mocap4r2_interfaces</exec_depend>
+  <exec_depend>python3-numpy</exec_depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>rosbag2_py</exec_depend>
+  <exec_depend>rosidl_runtime_py</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>tf2_ros_py</exec_depend>
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>ament_xmllint</test_depend>
+  <test_depend>python3-pytest</test_depend>
+  <test_depend>rosbag2_storage_default_plugins</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

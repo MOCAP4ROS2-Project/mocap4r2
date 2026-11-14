@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "geometry_msgs/msg/pose_stamped.hpp"
+#include "nav_msgs/msg/odometry.hpp"
 #include "mocap4r2_interfaces/msg/rigid_bodies.hpp"
 #include "mocap4r2_interfaces/srv/set_origin.hpp"
 #include "mocap4r2_robot_gt/gt_math.hpp"
@@ -271,6 +272,38 @@ TEST_F(RobotGTTest, custom_frames_and_initial_origin)
   expect_tf_eq(lookup("r1/gt_odom", "r1/base_footprint_gt"), from_xyzrpy({2, 0, 0, 0, 0, 0}));
 }
 
+TEST_F(RobotGTTest, odometry_velocities_in_the_robot_frame)
+{
+  make({{"rigid_body", "robot"}, {"velocity_alpha", 1.0}});
+  std::vector<nav_msgs::msg::Odometry> odoms;
+  auto sub = client_->create_subscription<nav_msgs::msg::Odometry>(
+    "/robot_gt/odom", rclcpp::QoS(10),
+    [&](nav_msgs::msg::Odometry::ConstSharedPtr m) {odoms.push_back(*m);});
+  // Robot yawed 90 degrees moving along world +y at 1 m/s and turning at 0.5 rad/s:
+  // in its own frame it moves forward (+x).
+  RigidBodies msg;
+  msg.header.frame_id = "mocap";
+  const auto t0 = client_->now();
+  ASSERT_TRUE(spin_until([&] {return sub->get_publisher_count() > 0;}));
+  for (int i = 0; i < 20; i++) {
+    const double t = i * 0.1;
+    msg.header.stamp = t0 + rclcpp::Duration::from_seconds(t);
+    msg.rigid_bodies = {body("robot", from_xyzrpy({0.0, t, 0.0, 0.0, 0.0, M_PI_2 + 0.5 * t}))};
+    pub_->publish(msg);
+    spin_until([] {return false;}, 1s);
+    if (odoms.size() >= 5) {
+      break;
+    }
+  }
+  ASSERT_GE(odoms.size(), 3u);
+  const auto & o = odoms.back();
+  EXPECT_EQ(o.child_frame_id, "base_link_gt");
+  EXPECT_EQ(o.header.frame_id, "gt_origin");
+  EXPECT_NEAR(o.twist.twist.angular.z, 0.5, 1e-6);
+  EXPECT_NEAR(std::hypot(o.twist.twist.linear.x, o.twist.twist.linear.y), 1.0, 0.03);
+  EXPECT_GT(o.twist.twist.linear.x, 0.9);  // mostly forward in the robot frame
+}
+
 TEST(RobotGTParams, malformed_vectors_are_rejected)
 {
   EXPECT_THROW(
@@ -279,6 +312,9 @@ TEST(RobotGTParams, malformed_vectors_are_rejected)
   EXPECT_THROW(
     RobotGT(rclcpp::NodeOptions().parameter_overrides(
       {{"origin", std::vector<double>{1}}})), std::invalid_argument);
+  EXPECT_THROW(
+    RobotGT(rclcpp::NodeOptions().parameter_overrides({{"velocity_alpha", 0.0}})),
+    std::invalid_argument);
 }
 
 int main(int argc, char ** argv)

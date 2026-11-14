@@ -103,16 +103,18 @@ class MocapClient:
         Finalized systems and systems whose node no longer exists are skipped when
         alive_only is True.
         """
-        end = time.monotonic() + timeout
+        start = time.monotonic()
+        end = start + timeout
         last_count = -1
-        stable_since = time.monotonic()
+        stable_since = start
         while time.monotonic() < end:
             rclpy.spin_once(self._node, timeout_sec=0.05)
+            now = time.monotonic()
             if len(self._systems) != last_count:
                 last_count = len(self._systems)
-                stable_since = time.monotonic()
-            elif last_count > 0 and time.monotonic() - stable_since > 0.3:
-                break
+                stable_since = now
+            elif last_count > 0 and now - stable_since > 0.6 and now - start > 1.0:
+                break  # announcements settled (discovery may bring them one by one)
         systems = dict(self._systems)
         if alive_only:
             alive = {

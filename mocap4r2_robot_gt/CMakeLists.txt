@@ -11,6 +11,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(mocap4r2_interfaces REQUIRED)
+find_package(nav_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(tf2 REQUIRED)
@@ -25,6 +26,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 target_link_libraries(${PROJECT_NAME} PUBLIC
   ${geometry_msgs_TARGETS}
   ${mocap4r2_interfaces_TARGETS}
+  ${nav_msgs_TARGETS}
   rclcpp::rclcpp
   tf2::tf2
   tf2_geometry_msgs::tf2_geometry_msgs
@@ -62,5 +64,5 @@ endif()
 
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 ament_export_dependencies(
-  geometry_msgs mocap4r2_interfaces rclcpp tf2 tf2_geometry_msgs tf2_ros)
+  geometry_msgs mocap4r2_interfaces nav_msgs rclcpp tf2 tf2_geometry_msgs tf2_ros)
 ament_package()

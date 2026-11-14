@@ -19,5 +19,5 @@ import pytest
 @pytest.mark.linter
 @pytest.mark.pep257
 def test_pep257():
-    rc = main(argv=[])
+    rc = main(argv=['.', 'test', '--exclude=mocap4r2_tools/vendor'])
     assert rc == 0, 'Found code style errors / warnings'

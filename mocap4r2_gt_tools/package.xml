@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>mocap4r2_gt_tools</name>
+  <version>2.0.0</version>
+  <description>Ground-truth tools of MOCAP4ROS2: online localization error (ATE/RPE) with TUM export, map-mocap frame alignment and marker body calibration</description>
+  <maintainer email="fmrico@gmail.com">Francisco Martín Rico</maintainer>
+  <license>Apache-2.0</license>
+  <url type="website">https://mocap4ros2-project.github.io</url>
+  <url type="repository">https://github.com/MOCAP4ROS2-Project/mocap4r2</url>
+  <url type="bugtracker">https://github.com/MOCAP4ROS2-Project/mocap4r2/issues</url>
+  <author email="fmrico@gmail.com">Francisco Martín Rico</author>
+
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>mocap4r2_interfaces</exec_depend>
+  <exec_depend>python3-numpy</exec_depend>
+  <exec_depend>python3-yaml</exec_depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>std_srvs</exec_depend>
+  <exec_depend>tf2_ros_py</exec_depend>
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>ament_xmllint</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

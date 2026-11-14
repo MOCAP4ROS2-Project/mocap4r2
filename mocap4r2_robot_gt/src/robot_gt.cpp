@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <cmath>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -40,6 +42,10 @@ RobotGT::RobotGT(const rclcpp::NodeOptions & options)
     "body_to_robot", {0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
   const auto origin = declare_parameter<std::vector<double>>(
     "origin", {0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
+  velocity_alpha_ = declare_parameter<double>("velocity_alpha", 0.5);
+  if (velocity_alpha_ <= 0.0 || velocity_alpha_ > 1.0) {
+    throw std::invalid_argument("velocity_alpha must be in (0, 1]");
+  }
 
   // Throws on malformed vectors: a wrong ground truth is worse than none.
   offset_ = from_xyzrpy(origin).inverse();
@@ -55,6 +61,7 @@ RobotGT::RobotGT(const rclcpp::NodeOptions & options)
     "rigid_bodies", rclcpp::QoS(10).best_effort(),
     [this](mocap4r2_interfaces::msg::RigidBodies::ConstSharedPtr msg) {bodies_callback(msg);});
   pose_pub_ = create_publisher<geometry_msgs::msg::PoseStamped>("~/pose", rclcpp::QoS(10));
+  odom_pub_ = create_publisher<nav_msgs::msg::Odometry>("~/odom", rclcpp::QoS(10));
   origin_srv_ = create_service<mocap4r2_interfaces::srv::SetOrigin>(
     "~/set_origin",
     [this](
@@ -146,6 +153,41 @@ RobotGT::bodies_callback(const mocap4r2_interfaces::msg::RigidBodies::ConstShare
   pose.header = gt_tf.header;
   pose.pose = to_pose(gt);
   pose_pub_->publish(pose);
+  publish_odometry(gt, gt_tf.header);
+}
+
+void
+RobotGT::publish_odometry(const tf2::Transform & gt, const std_msgs::msg::Header & header)
+{
+  const rclcpp::Time stamp(header.stamp, get_clock()->get_clock_type());
+  if (previous_gt_) {
+    const double dt = (stamp - previous_stamp_).seconds();
+    if (dt <= 0.0) {
+      return;  // repeated or out-of-order frame
+    }
+    // Velocities in the robot frame (REP-105 odometry twist).
+    const tf2::Transform delta = previous_gt_->inverse() * gt;
+    const tf2::Vector3 v = delta.getOrigin() / dt;
+    const tf2::Quaternion dq = delta.getRotation();
+    const tf2::Vector3 w = dq.getAxis() * (dq.getAngle() > M_PI ? dq.getAngle() - 2.0 * M_PI :
+      dq.getAngle()) / dt;
+    linear_ = linear_ * (1.0 - velocity_alpha_) + v * velocity_alpha_;
+    angular_ = angular_ * (1.0 - velocity_alpha_) + w * velocity_alpha_;
+  }
+  previous_gt_ = gt;
+  previous_stamp_ = stamp;
+
+  nav_msgs::msg::Odometry odom;
+  odom.header = header;
+  odom.child_frame_id = gt_frame_;
+  odom.pose.pose = to_pose(gt);
+  odom.twist.twist.linear.x = linear_.x();
+  odom.twist.twist.linear.y = linear_.y();
+  odom.twist.twist.linear.z = linear_.z();
+  odom.twist.twist.angular.x = angular_.x();
+  odom.twist.twist.angular.y = angular_.y();
+  odom.twist.twist.angular.z = angular_.z();
+  odom_pub_->publish(odom);
 }
 
 void

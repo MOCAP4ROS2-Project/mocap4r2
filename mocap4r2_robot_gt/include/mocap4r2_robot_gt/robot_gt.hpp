@@ -20,6 +20,7 @@
 #include <string>
 
 #include "geometry_msgs/msg/pose_stamped.hpp"
+#include "nav_msgs/msg/odometry.hpp"
 #include "mocap4r2_interfaces/msg/rigid_bodies.hpp"
 #include "mocap4r2_interfaces/srv/set_origin.hpp"
 #include "rclcpp/rclcpp.hpp"
@@ -48,6 +49,7 @@ public:
   std::optional<tf2::Transform> current() const {return current_;}
 
 private:
+  void publish_odometry(const tf2::Transform & gt, const std_msgs::msg::Header & header);
   void bodies_callback(const mocap4r2_interfaces::msg::RigidBodies::ConstSharedPtr msg);
   bool resolve_body_to_robot();
   void set_origin(
@@ -62,12 +64,18 @@ private:
   std::optional<tf2::Transform> body_to_robot_;
   tf2::Transform offset_;
   std::optional<tf2::Transform> current_;
+  std::optional<tf2::Transform> previous_gt_;
+  rclcpp::Time previous_stamp_;
+  double velocity_alpha_{0.5};
+  tf2::Vector3 linear_{0, 0, 0};
+  tf2::Vector3 angular_{0, 0, 0};
 
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
   std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
   rclcpp::Subscription<mocap4r2_interfaces::msg::RigidBodies>::SharedPtr sub_;
   rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr pose_pub_;
+  rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_pub_;
   rclcpp::Service<mocap4r2_interfaces::srv::SetOrigin>::SharedPtr origin_srv_;
 };
 

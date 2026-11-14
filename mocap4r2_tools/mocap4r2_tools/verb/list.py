@@ -20,7 +20,7 @@ class ListVerb(VerbExtension):
     """List the mocap systems and their state."""
 
     def add_arguments(self, parser, cli_name):
-        add_timeout_argument(parser, 1.0)
+        add_timeout_argument(parser, 2.0)
         parser.add_argument(
             '--all', action='store_true',
             help='Include systems whose node is gone or finalized')

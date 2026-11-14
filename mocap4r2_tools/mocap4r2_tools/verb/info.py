@@ -21,7 +21,7 @@ class InfoVerb(VerbExtension):
 
     def add_arguments(self, parser, cli_name):
         parser.add_argument('system', help='Mocap system (fully qualified or plain node name)')
-        add_timeout_argument(parser, 1.0)
+        add_timeout_argument(parser, 2.0)
 
     def main(self, *, args):
         with mocap_node() as node:

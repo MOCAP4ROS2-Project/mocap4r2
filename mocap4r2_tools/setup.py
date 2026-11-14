@@ -20,7 +20,9 @@ package_name = 'mocap4r2_tools'
 setup(
     name=package_name,
     version='2.0.0',
-    packages=find_packages(exclude=['test']),
+    packages=find_packages(include=[package_name, package_name + '.*'], exclude=['test']),
+    include_package_data=True,
+    package_data={package_name: ['vendor/**']},
     data_files=[
         ('share/' + package_name, ['package.xml']),
         ('share/ament_index/resource_index/packages', ['resource/' + package_name]),
@@ -34,6 +36,9 @@ setup(
     license='Apache-2.0',
     extras_require={'test': ['pytest']},
     entry_points={
+        'console_scripts': [
+            'tui = mocap4r2_tools.tui.app:run_app',
+        ],
         'ros2cli.command': [
             'mocap4r2 = mocap4r2_tools.command.mocap4r2:Mocap4r2Command',
         ],
@@ -45,6 +50,12 @@ setup(
             'info = mocap4r2_tools.verb.info:InfoVerb',
             'start = mocap4r2_tools.verb.control:StartVerb',
             'stop = mocap4r2_tools.verb.control:StopVerb',
+            'bodies = mocap4r2_tools.verb.bodies:BodiesVerb',
+            'hz = mocap4r2_tools.verb.hz:HzVerb',
+            'record = mocap4r2_tools.verb.record:RecordVerb',
+            'doctor = mocap4r2_tools.verb.doctor:DoctorVerb',
+            'tui = mocap4r2_tools.verb.tui:TuiVerb',
+            'export = mocap4r2_tools.verb.export:ExportVerb',
         ],
     },
 )
