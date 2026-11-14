@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>mocap4r2_marker_viz</name>
+  <version>2.0.0</version>
+  <description>RViz visualization of MOCAP4ROS2 markers, rigid bodies and skeletons</description>
+  <maintainer email="fmrico@gmail.com">Francisco Martín Rico</maintainer>
+  <license>Apache-2.0</license>
+  <url type="website">https://mocap4ros2-project.github.io</url>
+  <url type="repository">https://github.com/MOCAP4ROS2-Project/mocap4r2</url>
+  <url type="bugtracker">https://github.com/MOCAP4ROS2-Project/mocap4r2/issues</url>
+  <author email="fmrico@gmail.com">Francisco Martín Rico</author>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>mocap4r2_interfaces</depend>
+  <depend>rclcpp</depend>
+  <depend>rclcpp_components</depend>
+  <depend>visualization_msgs</depend>
+
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>rviz2</exec_depend>
+
+  <test_depend>ament_cmake_gtest</test_depend>
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

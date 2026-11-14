@@ -1,0 +1,25 @@
+# Simulated mocap system: two bodies, some noise, rare occlusions.
+sim_driver:
+  ros__parameters:
+    frame_id: mocap
+    rate: 120.0
+    latency: 0.004
+    frame_drop_probability: 0.0
+    bodies: [robot, wand]
+    markers_per_body: 4
+    unlabeled_markers: 2
+    noise: 0.0005
+    occlusion_probability: 0.002
+    occlusion_duration: 0.3
+    publish_tf: true
+    bodies_config:
+      robot:
+        motion: circle
+        center: [0.0, 0.0, 0.1]
+        radius: 1.0
+        period: 20.0
+      wand:
+        motion: figure8
+        center: [0.5, 0.5, 1.2]
+        radius: 0.8
+        period: 8.0

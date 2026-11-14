@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>mocap4r2_tools</name>
+  <version>2.0.0</version>
+  <description>Command line (ros2 mocap4r2) and terminal tools to monitor and control MOCAP4ROS2 systems</description>
+  <maintainer email="fmrico@gmail.com">Francisco Martín Rico</maintainer>
+  <license>Apache-2.0</license>
+  <url type="website">https://mocap4ros2-project.github.io</url>
+  <url type="repository">https://github.com/MOCAP4ROS2-Project/mocap4r2</url>
+  <url type="bugtracker">https://github.com/MOCAP4ROS2-Project/mocap4r2/issues</url>
+  <author email="fmrico@gmail.com">Francisco Martín Rico</author>
+
+  <exec_depend>lifecycle_msgs</exec_depend>
+  <exec_depend>mocap4r2_interfaces</exec_depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>ros2cli</exec_depend>
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>ament_xmllint</test_depend>
+  <test_depend>mocap4r2_sim_driver</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

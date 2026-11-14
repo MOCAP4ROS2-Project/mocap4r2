@@ -1,0 +1,6 @@
+# Example of an auxiliary system that joins capture sessions.
+emg_recorder:
+  ros__parameters:
+    topics:
+      - emg/raw:std_msgs/msg/Float64MultiArray
+      - emg/status

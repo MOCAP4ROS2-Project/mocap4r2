@@ -1,0 +1,13 @@
+# Ground truth of a robot carrying the mocap rigid body "robot".
+robot_gt:
+  ros__parameters:
+    rigid_body: robot          # name in the mocap software (empty: the only body)
+    robot_frame: base_link     # robot frame whose ground truth is wanted
+    gt_frame: base_link_gt     # published ground-truth frame
+    origin_frame: gt_origin    # frame of the ground-truth origin (see ~/set_origin)
+    # Pose of the robot frame in the rigid body frame [x, y, z, roll, pitch, yaw].
+    # Ignored if body_frame is set: the transform is then read from TF.
+    body_to_robot: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    body_frame: ""
+    # Pose of origin_frame in the mocap frame [x, y, z, roll, pitch, yaw].
+    origin: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
