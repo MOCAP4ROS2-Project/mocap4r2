@@ -29,11 +29,28 @@ from mocap4r2_tools.client import mocap_node, MocapClient  # noqa: E402
 from mocap4r2_tools.monitor import MocapMonitor  # noqa: E402
 from textual.app import App, ComposeResult  # noqa: E402
 from textual.binding import Binding  # noqa: E402
-from textual.containers import Vertical  # noqa: E402
-from textual.widgets import DataTable, Footer, Header, Input, RichLog, Static  # noqa: E402
+from textual.containers import Horizontal, Vertical  # noqa: E402
+from textual.widgets import (  # noqa: E402
+    Button, DataTable, Footer, Header, Input, RichLog, Static)
 
 LEVEL = {0: ('OK', 'green'), 1: ('WARN', 'yellow'), 2: ('ERROR', 'red'), 3: ('STALE', 'grey50')}
-STATE_COLOR = {'active': 'green', 'inactive': 'yellow', 'unconfigured': 'grey50'}
+STATE_COLOR = {'active': 'green', 'inactive': 'yellow', 'unconfigured': 'grey50',
+               'finalized': 'red'}
+
+
+def link_state(info, stats):
+    """(text, color) of the link with the mocap software."""
+    if info.state.label == 'unconfigured':
+        return 'not connected', 'grey50'
+    if not stats:
+        return 'waiting for diagnostics', 'grey50'
+    if not stats.server and not stats.connected:
+        return 'unknown', 'grey50'
+    if not stats.connected:
+        return 'disconnected', 'red'
+    if info.state.label == 'active' and stats.rate <= 0.0:
+        return 'connected, no data', 'yellow'
+    return 'connected', 'green'
 
 
 def fmt_rate(stats, info):
@@ -48,10 +65,14 @@ class MocapTui(App):
 
     TITLE = 'MOCAP4ROS2'
     CSS = """
-    #systems { height: 40%; }
-    #bodies { height: 1fr; }
-    #log { height: 8; border-top: solid $accent; }
+    #top { height: 14; }
+    #status-box { width: 46; border: round $accent; padding: 0 1; }
+    #status { height: 1fr; }
+    #toggle { width: 100%; margin-top: 1; }
+    #systems { width: 1fr; }
     #summary { height: 1; padding: 0 1; }
+    #bodies { height: 1fr; }
+    #log { height: 7; border-top: solid $accent; }
     #session { display: none; }
     """
     BINDINGS = [
@@ -68,11 +89,16 @@ class MocapTui(App):
         self.monitor = monitor
         self.session = ''
         self._rows = []
+        self._busy = False
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
         with Vertical():
-            yield DataTable(id='systems', cursor_type='row', zebra_stripes=True)
+            with Horizontal(id='top'):
+                with Vertical(id='status-box'):
+                    yield Static(id='status')
+                    yield Button('Start', id='toggle', variant='success', disabled=True)
+                yield DataTable(id='systems', cursor_type='row', zebra_stripes=True)
             yield Static(id='summary')
             yield DataTable(id='bodies', zebra_stripes=True)
             yield Input(placeholder='session name (Enter to set, Esc to cancel)', id='session')
@@ -80,14 +106,16 @@ class MocapTui(App):
         yield Footer()
 
     def on_mount(self):
+        self.query_one('#status-box').border_title = 'System'
         systems = self.query_one('#systems', DataTable)
-        systems.add_columns('System', 'Type', 'State', 'Rate', 'Latency', 'Dropped',
-                            'Status', 'Session')
+        systems.add_columns('System', 'Type', 'State', 'Link', 'Rate', 'Latency', 'Dropped',
+                            'Status')
         bodies = self.query_one('#bodies', DataTable)
         bodies.add_columns('Body', 'Tracked', 'Tracking %', 'x', 'y', 'z', 'Error (mm)',
                            'Markers')
         self.log_line('Waiting for mocap systems on /mocap4r2/systems ...')
         self.set_interval(0.25, self.refresh_view)
+        systems.focus()
 
     def log_line(self, text):
         self.query_one('#log', RichLog).write(f'[dim]{time.strftime("%H:%M:%S")}[/] {text}')
@@ -105,37 +133,68 @@ class MocapTui(App):
         cursor = table.cursor_row
         table.clear()
         for name in rows:
-            info = systems[name]
-            st = stats.get(name)
+            info, st = systems[name], stats.get(name)
             color = STATE_COLOR.get(info.state.label, 'white')
-            level, lcolor = LEVEL.get(st.level, ('?', 'white')) if st else ('-', 'white')
+            link, lcolor = link_state(info, st)
+            level, vcolor = LEVEL.get(st.level, ('?', 'white')) if st else ('-', 'white')
             table.add_row(
-                name, info.type, f'[{color}]{info.state.label}[/]', fmt_rate(st, info),
+                name, info.type, f'[{color}]{info.state.label}[/]', f'[{lcolor}]{link}[/]',
+                fmt_rate(st, info),
                 f'{st.latency_ms:.1f} ms' if st and info.state.label == 'active' else '-',
                 f'{st.total_dropped}' if st else '-',
-                f'[{lcolor}]{level}[/] {st.message}' if st else '-',
-                info.session_id or '-')
+                f'[{vcolor}]{level}[/] {st.message}' if st else '-')
         self._rows = rows
         if rows:
             table.move_cursor(row=min(max(cursor, 0), len(rows) - 1))
         sel = self.selected()
         self.monitor.watch(sel)
+        info = systems.get(sel) if sel else None
+        self.refresh_status(sel, info, stats.get(sel) if sel else None)
         self.refresh_bodies(sel, stats.get(sel) if sel else None, view)
+
+    def refresh_status(self, sel, info, st):
+        status = self.query_one('#status', Static)
+        button = self.query_one('#toggle', Button)
+        if not info:
+            status.update('[grey50]No mocap system selected.\n\n'
+                          'Start a driver, e.g.\nros2 launch mocap4r2_sim_driver '
+                          'sim_driver.launch.py[/]')
+            button.disabled = True
+            return
+        state = info.state.label
+        color = STATE_COLOR.get(state, 'white')
+        link, lcolor = link_state(info, st)
+        server = st.server if st and st.server else '-'
+        rate = fmt_rate(st, info)
+        lines = [
+            f'[b]{sel}[/b] ({info.type})',
+            f'Lifecycle  [{color}][b]{state.upper()}[/b][/]',
+            f'Software   [{lcolor}]{link}[/]',
+            f'           [dim]{server}[/]',
+            f'Rate       {rate}   latency '
+            + (f'{st.latency_ms:.1f} ms' if st and state == 'active' else '-'),
+            f'Dropped    {st.total_dropped if st else "-"}   frame [dim]{info.frame_id}[/]',
+            f'Session    {info.session_id or "-"}',
+        ]
+        status.update('\n'.join(lines))
+        active = state == 'active'
+        button.label = 'Stop (deactivate)' if active else 'Start (activate)'
+        button.variant = 'error' if active else 'success'
+        button.disabled = self._busy or state == 'finalized'
 
     def refresh_bodies(self, sel, st, view):
         summary = self.query_one('#summary', Static)
         bodies = self.query_one('#bodies', DataTable)
         bodies.clear()
         if not sel:
-            summary.update('No system selected')
+            summary.update('')
             return
         age = time.monotonic() - view.stamp if view.stamp else None
         fresh = age is not None and age < 1.0
         summary.update(
-            f'[b]{sel}[/b]  markers: [green]{view.labeled}[/] labeled, '
-            f'{view.unlabeled} unlabeled, [red]{view.occluded}[/] occluded'
-            + ('' if fresh else '  [grey50](no data)[/]')
-            + (f'   session: [b]{self.session}[/]' if self.session else ''))
+            f'markers: [green]{view.labeled}[/] labeled, {view.unlabeled} unlabeled, '
+            f'[red]{view.occluded}[/] occluded' + ('' if fresh else '  [grey50](no data)[/]')
+            + (f'   next session: [b]{self.session}[/]' if self.session else ''))
         if not view.bodies:
             return
         for rb in view.bodies.rigid_bodies:
@@ -153,6 +212,7 @@ class MocapTui(App):
         what = ', '.join(targets) if targets else 'all systems'
         self.log_line(f'{verb} {what}' + (f' (session {self.session})' if self.session else ''))
         session = self.session
+        self._busy = True
 
         def work():
             try:
@@ -165,7 +225,17 @@ class MocapTui(App):
                 lines = [f'[red]{e}[/]']
             for line in lines:
                 self.call_from_thread(self.log_line, line)
+            self._busy = False
         threading.Thread(target=work, daemon=True).start()
+
+    def on_button_pressed(self, event: Button.Pressed):
+        if event.button.id != 'toggle' or not self.selected():
+            return
+        systems, _, _ = self.monitor.snapshot()
+        info = systems.get(self.selected())
+        if info:
+            command = Control.STOP if info.state.label == 'active' else Control.START
+            self.control(command, [self.selected()])
 
     def action_start(self):
         if self.selected():

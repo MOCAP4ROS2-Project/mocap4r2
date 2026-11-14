@@ -21,13 +21,10 @@ class ListVerb(VerbExtension):
 
     def add_arguments(self, parser, cli_name):
         add_timeout_argument(parser, 2.0)
-        parser.add_argument(
-            '--all', action='store_true',
-            help='Include systems whose node is gone or finalized')
 
     def main(self, *, args):
         with mocap_node() as node:
-            systems = MocapClient(node).systems(args.timeout, alive_only=not args.all)
+            systems = MocapClient(node).systems(args.timeout)
         if not systems:
             print('No mocap systems found')
             return 0

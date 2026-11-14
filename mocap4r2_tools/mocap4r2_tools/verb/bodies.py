@@ -43,7 +43,7 @@ class BodiesVerb(VerbExtension):
     def main(self, *, args):
         with mocap_node() as node:
             client = MocapClient(node)
-            systems = client.systems(min(args.timeout, 1.0))
+            systems = client.systems(args.timeout, wait_for=[args.system])
             try:
                 name = client.resolve([args.system], systems)[0]
             except MocapError as e:

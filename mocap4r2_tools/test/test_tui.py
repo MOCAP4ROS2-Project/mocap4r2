@@ -63,8 +63,18 @@ def test_tui_shows_systems_and_bodies(sims):
             row = systems.get_row_at(0)
             assert row[0] == '/tui_sim'
             assert 'active' in str(row[2])
-            # Stop it from the keyboard and see the state change.
-            await pilot.press('x')
+            # The status box shows lifecycle and link with the (simulated) software.
+            end = time.monotonic() + 10
+            while time.monotonic() < end and \
+                    'simulated scene' not in str(app.query_one('#status').render()):
+                await pilot.pause(0.25)
+            status = str(app.query_one('#status').render())
+            assert 'ACTIVE' in status and 'connected' in status and 'simulated scene' in status
+            # Stop it with the button of the status box and see the state change.
+            from textual.widgets import Button
+            button = app.query_one('#toggle', Button)
+            assert 'Stop' in str(button.label)
+            await pilot.click('#toggle')
             end = time.monotonic() + 15
             while time.monotonic() < end and 'inactive' not in str(systems.get_row_at(0)[2]):
                 await pilot.pause(0.25)

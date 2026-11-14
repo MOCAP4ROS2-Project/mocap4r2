@@ -42,6 +42,8 @@ class SystemStats:
     total_dropped: int = 0
     total_frames: int = 0
     tracking: Dict[str, float] = field(default_factory=dict)
+    server: str = ''
+    connected: bool = False
     stamp: float = 0.0
 
 
@@ -76,6 +78,8 @@ def parse_diagnostic(status) -> Optional[tuple]:
     s.dropped = num('dropped', int)
     s.total_dropped = num('total_dropped', int)
     s.total_frames = num('total_frames', int)
+    s.server = values.get('server', '')
+    s.connected = values.get('connected', 'false') == 'true'
     for k, v in values.items():
         if k.startswith('tracking/'):
             try:

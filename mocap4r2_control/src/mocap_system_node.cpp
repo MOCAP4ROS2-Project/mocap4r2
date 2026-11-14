@@ -356,6 +356,8 @@ MocapSystemNode::produce_diagnostics(diagnostic_updater::DiagnosticStatusWrapper
 {
   using diagnostic_msgs::msg::DiagnosticStatus;
   status.add("system", system_id_);
+  status.add("server", server());
+  status.add("connected", connected() ? "true" : "false");
   if (!active_) {
     stats_.take(steady_now());
     status.summary(DiagnosticStatus::OK, "inactive");

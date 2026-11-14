@@ -17,6 +17,7 @@
 
 #include <atomic>
 #include <memory>
+#include <string>
 #include <thread>
 
 #include "mocap4r2_control/frame_publisher.hpp"
@@ -41,6 +42,8 @@ protected:
   CallbackReturn on_system_deactivate() override;
   CallbackReturn on_system_cleanup() override;
   double nominal_frame_rate() const override {return rate_;}
+  std::string server() const override {return "simulated scene";}
+  bool connected() const override {return scene_ != nullptr;}
 
 private:
   void acquisition_loop();

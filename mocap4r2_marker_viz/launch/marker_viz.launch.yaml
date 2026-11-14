@@ -1,0 +1,31 @@
+# Copyright 2026 Intelligent Robotics Lab
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# RViz visualization of the markers, rigid bodies and skeletons of a mocap system.
+launch:
+  - arg: {name: namespace, default: "", description: "Namespace of the mocap system topics"}
+  - arg: {name: rviz, default: "true", description: "Start RViz"}
+  - arg: {name: rviz_config, default: "$(find-pkg-share mocap4r2_marker_viz)/rviz/mocap4r2.rviz"}
+  - node:
+      pkg: mocap4r2_marker_viz
+      exec: marker_viz
+      namespace: $(var namespace)
+      output: screen
+  - node:
+      if: $(var rviz)
+      pkg: rviz2
+      exec: rviz2
+      namespace: $(var namespace)
+      args: -d $(var rviz_config)
+      output: screen

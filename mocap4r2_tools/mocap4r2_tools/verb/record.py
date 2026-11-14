@@ -25,6 +25,16 @@ import yaml
 BASE_TOPICS = ['/tf', '/tf_static', '/mocap4r2/systems', '/diagnostics']
 
 
+def topic_args(topics):
+    """Topics as rosbag2 wants them: --topics from Jazzy, positional in Humble."""
+    try:
+        help_text = subprocess.run(['ros2', 'bag', 'record', '--help'], capture_output=True,
+                                   text=True, timeout=30).stdout
+    except (OSError, subprocess.TimeoutExpired):
+        help_text = ''
+    return (['--topics'] + topics) if '--topics' in help_text else topics
+
+
 def session_metadata(session, systems, start, end, bag_dir):
     return {
         'mocap4r2_session': {
@@ -59,9 +69,9 @@ class RecordVerb(VerbExtension):
         out = args.output or session
         if os.path.exists(out):
             return f'Error: {out} already exists'
-        with mocap_node('mocap4r2_record') as node:
+        with mocap_node('mocap4r2_record', handle_signals=False) as node:
             client = MocapClient(node)
-            systems = client.systems(1.0)
+            systems = client.systems(3.0, wait_for=args.systems)
             try:
                 targets = client.resolve(args.systems, systems) if args.systems else \
                     sorted(systems)
@@ -76,14 +86,14 @@ class RecordVerb(VerbExtension):
                     client.control(Control.STOP, targets, timeout=args.timeout, systems=systems)
                     failed = [n for n, a in result.acks.items() if not a.success] + result.missing
                     return f'Error: cannot start {", ".join(failed)}'
-            systems = client.systems(1.0)
+            systems = client.systems(2.0)
             infos = [systems[t] for t in targets if t in systems]
             topics = sorted(set(BASE_TOPICS + args.topics + [t for i in infos for t in i.topics]))
             print(f'Recording session "{session}" into {out}:')
             for t in topics:
                 print(f'  {t}')
             start = datetime.datetime.now()
-            bag = subprocess.Popen(['ros2', 'bag', 'record', '-o', out] + topics)
+            bag = subprocess.Popen(['ros2', 'bag', 'record', '-o', out] + topic_args(topics))
             try:
                 bag.wait()
             except KeyboardInterrupt:

@@ -52,11 +52,16 @@ class ControlResult:
 
 
 @contextmanager
-def mocap_node(name: str = 'mocap4r2_cli'):
+def mocap_node(name: str = 'mocap4r2_cli', handle_signals: bool = True):
     """Create a hidden rclpy node for one command."""
     own_context = not rclpy.ok()
     if own_context:
-        rclpy.init()
+        if handle_signals:
+            rclpy.init()
+        else:
+            # The command handles Ctrl-C itself and still needs ROS afterwards.
+            from rclpy.signals import SignalHandlerOptions
+            rclpy.init(signal_handler_options=SignalHandlerOptions.NO)
     node = rclpy.create_node('_' + name + '_' + uuid.uuid4().hex[:8])
     try:
         yield node
@@ -95,14 +100,18 @@ class MocapClient:
             rclpy.spin_once(self._node, timeout_sec=0.05)
         return cond()
 
-    def systems(self, timeout: float = 1.0, alive_only: bool = True) -> Dict[str, MocapSystemInfo]:
+    def systems(self, timeout: float = 1.0, alive_only: bool = False,
+                wait_for: Iterable[str] = ()) -> Dict[str, MocapSystemInfo]:
         """
         Return the announced systems, keyed by fully qualified node name.
 
-        Waits until no new announcement arrives for a while, at most timeout seconds.
-        Finalized systems and systems whose node no longer exists are skipped when
-        alive_only is True.
+        Waits until no new announcement arrives for a while, at most timeout seconds;
+        with wait_for, until those systems (full or plain names) are known.
+        Finalized systems are skipped. A fresh node only receives announcements of
+        live systems; long-lived nodes can drop systems whose node is gone with
+        alive_only (it needs the ROS graph, which may be discovered later).
         """
+        wanted = list(wait_for)
         start = time.monotonic()
         end = start + timeout
         last_count = -1
@@ -113,9 +122,12 @@ class MocapClient:
             if len(self._systems) != last_count:
                 last_count = len(self._systems)
                 stable_since = now
+            elif wanted:
+                if all(self._known(w) for w in wanted):
+                    break
             elif last_count > 0 and now - stable_since > 0.6 and now - start > 1.0:
                 break  # announcements settled (discovery may bring them one by one)
-        systems = dict(self._systems)
+        systems = {k: v for k, v in self._systems.items() if v.state.label != 'finalized'}
         if alive_only:
             alive = {
                 (ns.rstrip('/') + '/' + name) for name, ns in
@@ -124,6 +136,10 @@ class MocapClient:
                 k: v for k, v in systems.items()
                 if k in alive and v.state.label != 'finalized'}
         return systems
+
+    def _known(self, name: str) -> bool:
+        return name in self._systems or any(
+            s.rsplit('/', 1)[-1] == name.strip('/') for s in self._systems)
 
     def resolve(self, names: Iterable[str], systems: Dict[str, MocapSystemInfo]) -> List[str]:
         """Map user names (fully qualified or unique plain names) to system ids."""

@@ -20,7 +20,7 @@ from mocap4r2_tools.verb import add_timeout_argument, VerbExtension
 def run_control(args, command):
     with mocap_node() as node:
         client = MocapClient(node)
-        systems = client.systems(min(args.timeout, 1.0))
+        systems = client.systems(min(args.timeout, 3.0), wait_for=args.systems)
         try:
             targets = client.resolve(args.systems, systems) if args.systems else []
             result = client.control(

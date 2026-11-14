@@ -96,6 +96,13 @@ protected:
   // Nominal frame rate announced in MocapSystemInfo (0 if unknown).
   virtual double nominal_frame_rate() const {return 0.0;}
 
+  // Mocap software the system talks to (e.g. "Motive 3.1 at 192.168.1.10"), shown by
+  // the tools; empty if not applicable.
+  virtual std::string server() const {return "";}
+
+  // Whether the link with that software is up (reported in /diagnostics).
+  virtual bool connected() const {return false;}
+
   // Create a data publisher with data_qos(); it is announced and (de)activated
   // with the node. Call it from on_system_configure.
   template<typename MessageT>
