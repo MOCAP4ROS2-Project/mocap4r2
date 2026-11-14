@@ -16,9 +16,10 @@
   <exec_depend>mocap4r2_interfaces</exec_depend>
   <exec_depend>mocap4r2_motion_tools</exec_depend>
   <exec_depend>rclpy</exec_depend>
-  <exec_depend>python3-platformdirs</exec_depend>
-  <exec_depend>python3-rich</exec_depend>
-  <exec_depend>python3-typing-extensions</exec_depend>
+  <!-- TUI only; Humble (RHEL 8) lacks these keys and its rich is too old for Textual -->
+  <exec_depend condition="$ROS_DISTRO != humble">python3-platformdirs</exec_depend>
+  <exec_depend condition="$ROS_DISTRO != humble">python3-rich</exec_depend>
+  <exec_depend condition="$ROS_DISTRO != humble">python3-typing-extensions</exec_depend>
   <exec_depend>python3-yaml</exec_depend>
   <exec_depend>ros2bag</exec_depend>
   <exec_depend>ros2cli</exec_depend>
