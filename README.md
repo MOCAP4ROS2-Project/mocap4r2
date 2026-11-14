@@ -1,6 +1,6 @@
 # MOCAP4ROS2 core and tools
 
-[![CI](https://github.com/MOCAP4ROS2-Project/mocap4r2/actions/workflows/ci.yaml/badge.svg?branch=rolling)](https://github.com/MOCAP4ROS2-Project/mocap4r2/actions/workflows/ci.yaml)
+[![rolling](https://github.com/MOCAP4ROS2-Project/mocap4r2/actions/workflows/rolling.yaml/badge.svg?branch=rolling)](https://github.com/MOCAP4ROS2-Project/mocap4r2/actions/workflows/rolling.yaml) [![lyrical](https://github.com/MOCAP4ROS2-Project/mocap4r2/actions/workflows/lyrical.yaml/badge.svg?branch=rolling)](https://github.com/MOCAP4ROS2-Project/mocap4r2/actions/workflows/lyrical.yaml) [![kilted](https://github.com/MOCAP4ROS2-Project/mocap4r2/actions/workflows/kilted.yaml/badge.svg?branch=rolling)](https://github.com/MOCAP4ROS2-Project/mocap4r2/actions/workflows/kilted.yaml) [![jazzy](https://github.com/MOCAP4ROS2-Project/mocap4r2/actions/workflows/jazzy.yaml/badge.svg?branch=rolling)](https://github.com/MOCAP4ROS2-Project/mocap4r2/actions/workflows/jazzy.yaml) [![humble](https://github.com/MOCAP4ROS2-Project/mocap4r2/actions/workflows/humble.yaml/badge.svg?branch=rolling)](https://github.com/MOCAP4ROS2-Project/mocap4r2/actions/workflows/humble.yaml)
 
 The system-independent part of [MOCAP4ROS2](https://mocap4ros2-project.github.io):
 
